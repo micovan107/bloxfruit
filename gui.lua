@@ -1,9 +1,13 @@
--- [[ NGUYỄN TIẾN NAM - LOADER V32 PRO ]]
+-- [[ NGUYỄN TIẾN NAM - LOADER V32 PRO (SINGLE GUI) ]]
 local Players = game:GetService("Players")
 local SoundService = game:GetService("SoundService")
 local LocalPlayer = Players.LocalPlayer
 
--- Reset GUI cũ nếu có trùng lặp
+-- Khởi tạo các biến trạng thái toàn cục để chuyển đổi linh hoạt
+getgenv().AutoFarmLevel = false
+getgenv().AutoFarmRuong = false
+
+-- Reset GUI cũ tránh trùng lặp
 local oldKeyGui = LocalPlayer:WaitForChild("PlayerGui"):FindFirstChild("NamKeySystemGUI")
 if oldKeyGui then oldKeyGui:Destroy() end
 
@@ -17,13 +21,13 @@ local function playSound(soundId)
     end)
 end
 
--- Khởi tạo giao diện chính
+-- Khởi tạo giao diện chính duy nhất
 local KeyScreenGui = Instance.new("ScreenGui")
 KeyScreenGui.Name = "NamKeySystemGUI"
 KeyScreenGui.ResetOnSpawn = false
 KeyScreenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
 
--- Khung nền (Cân đối chiều cao 240 vừa vặn cho 2 nút chức năng)
+-- Khung nền chính
 local KeyFrame = Instance.new("Frame")
 KeyFrame.Size = UDim2.new(0, 310, 0, 240)
 KeyFrame.Position = UDim2.new(0.5, -155, 0.5, -120)
@@ -38,7 +42,7 @@ local KeyStroke = Instance.new("UIStroke", KeyFrame)
 KeyStroke.Thickness = 2.5
 KeyStroke.Color = Color3.fromRGB(0, 200, 255)
 
--- Tiêu đề
+-- Tiêu đề GUI
 local KeyTitle = Instance.new("TextLabel")
 KeyTitle.Size = UDim2.new(1, 0, 0, 40)
 KeyTitle.Position = UDim2.new(0, 0, 0, 0)
@@ -91,10 +95,10 @@ CheckKeyBtn.Parent = KeyFrame
 Instance.new("UICorner", CheckKeyBtn).CornerRadius = UDim.new(0, 8)
 
 ----------------------------------------------------
--- CÁC NÚT CHỨC NĂNG LÕI (SẼ HIỆN KHI NHẬP ĐÚNG KEY)
+-- PHẦN ĐIỀU KHIỂN TÍNH NĂNG (SAU KHI NHẬP KEY THÀNH CÔNG)
 ----------------------------------------------------
 
--- Khung chứa các nút tính năng (Mặc định ẩn)
+-- Khung chứa các nút điều khiển bật/tắt linh hoạt
 local FeatureFrame = Instance.new("Frame")
 FeatureFrame.Size = UDim2.new(0.85, 0, 0, 100)
 FeatureFrame.Position = UDim2.new(0.075, 0, 0.30, 0)
@@ -107,35 +111,35 @@ UIListLayout.FillDirection = Enum.FillDirection.Vertical
 UIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
 UIListLayout.Padding = UDim.new(0, 10)
 
--- 1. Nút Chạy Auto Farm Level
+-- 1. Nút bật/tắt Farm Level
 local AutoFarmBtn = Instance.new("TextButton")
 AutoFarmBtn.Size = UDim2.new(1, 0, 0, 38)
-AutoFarmBtn.Text = "KÍCH HOẠT FARM LEVEL"
-AutoFarmBtn.BackgroundColor3 = Color3.fromRGB(0, 100, 200)
+AutoFarmBtn.Text = "AUTO FARM LEVEL: OFF"
+AutoFarmBtn.BackgroundColor3 = Color3.fromRGB(180, 40, 40) -- Mặc định màu đỏ (Tắt)
 AutoFarmBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 AutoFarmBtn.Font = Enum.Font.GothamBold
 AutoFarmBtn.TextSize = 12
 AutoFarmBtn.Parent = FeatureFrame
 Instance.new("UICorner", AutoFarmBtn).CornerRadius = UDim.new(0, 8)
 local StrokeFarm = Instance.new("UIStroke", AutoFarmBtn)
-StrokeFarm.Color = Color3.fromRGB(0, 150, 255)
+StrokeFarm.Color = Color3.fromRGB(255, 100, 100)
 StrokeFarm.Thickness = 1.5
 
--- 2. Nút Chạy Auto Farm Rương
+-- 2. Nút bật/tắt Farm Rương
 local AutoRuongBtn = Instance.new("TextButton")
 AutoRuongBtn.Size = UDim2.new(1, 0, 0, 38)
-AutoRuongBtn.Text = "KÍCH HOẠT FARM RƯƠNG"
-AutoRuongBtn.BackgroundColor3 = Color3.fromRGB(180, 110, 0)
+AutoRuongBtn.Text = "AUTO FARM RƯƠNG: OFF"
+AutoRuongBtn.BackgroundColor3 = Color3.fromRGB(180, 40, 40) -- Mặc định màu đỏ (Tắt)
 AutoRuongBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 AutoRuongBtn.Font = Enum.Font.GothamBold
 AutoRuongBtn.TextSize = 12
 AutoRuongBtn.Parent = FeatureFrame
 Instance.new("UICorner", AutoRuongBtn).CornerRadius = UDim.new(0, 8)
 local StrokeRuong = Instance.new("UIStroke", AutoRuongBtn)
-StrokeRuong.Color = Color3.fromRGB(255, 170, 0)
+StrokeRuong.Color = Color3.fromRGB(255, 100, 100)
 StrokeRuong.Thickness = 1.5
 
--- Dòng chữ bản quyền nhỏ dưới đáy bảng
+-- Dòng chữ bản quyền dưới đáy bảng
 local Watermark = Instance.new("TextLabel")
 Watermark.Size = UDim2.new(1, 0, 0, 20)
 Watermark.Position = UDim2.new(0, 0, 1, -22)
@@ -147,7 +151,7 @@ Watermark.TextSize = 10
 Watermark.Parent = KeyFrame
 
 ----------------------------------------------------
--- SỰ KIỆN TƯƠNG TÁC (EVENTS)
+-- XỬ LÝ SỰ KIỆN TƯƠNG TÁC (EVENTS)
 ----------------------------------------------------
 
 local copyFunc = setclipboard or toclipboard
@@ -171,7 +175,7 @@ CheckKeyBtn.MouseButton1Click:Connect(function()
         KeyTitle.Text = "ĐĂNG NHẬP THÀNH CÔNG!"
         KeyTitle.TextColor3 = Color3.fromRGB(0, 255, 100)
         
-        -- Ẩn phần nhập Key & Hiện các nút chức năng chính
+        -- Ẩn phần nhập Key & Hiện các nút điều khiển
         KeyInput.Visible = false
         GetKeyBtn.Visible = false
         CheckKeyBtn.Visible = false
@@ -186,24 +190,66 @@ CheckKeyBtn.MouseButton1Click:Connect(function()
     end
 end)
 
--- Kích hoạt Farm Level (Tải file autofam.lua)
+----------------------------------------------------
+-- LOGIC BẬT/TẮT CHUYỂN ĐỔI LINH HOẠT TỪ 1 GUI
+----------------------------------------------------
+
+-- 1. Bật/Tắt Auto Farm Level
 AutoFarmBtn.MouseButton1Click:Connect(function()
     pcall(function() playSound("12221967") end)
-    AutoFarmBtn.Text = "ĐANG KÍCH HOẠT FARM LEVEL..."
-    pcall(function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/micovan107/bloxfruit/refs/heads/main/autofam.lua"))()
-    end)
-    task.wait(0.5)
-    AutoFarmBtn.Text = "FARM LEVEL [ĐANG CHẠY]"
+    
+    getgenv().AutoFarmLevel = not getgenv().AutoFarmLevel
+    
+    if getgenv().AutoFarmLevel then
+        -- Nếu bật Farm Level thì TỰ ĐỘNG TẮT Farm Rương để tránh xung đột
+        if getgenv().AutoFarmRuong then
+            getgenv().AutoFarmRuong = false
+            AutoRuongBtn.Text = "AUTO FARM RƯƠNG: OFF"
+            AutoRuongBtn.BackgroundColor3 = Color3.fromRGB(180, 40, 40)
+            StrokeRuong.Color = Color3.fromRGB(255, 100, 100)
+        end
+        
+        AutoFarmBtn.Text = "AUTO FARM LEVEL: ON"
+        AutoFarmBtn.BackgroundColor3 = Color3.fromRGB(0, 150, 80) -- Chuyển màu xanh lá
+        StrokeFarm.Color = Color3.fromRGB(100, 255, 100)
+        
+        -- Gọi tải file logic ngầm từ GitHub về chạy
+        pcall(function()
+            loadstring(game:HttpGet("https://raw.githubusercontent.com/micovan107/bloxfruit/refs/heads/main/autofam.lua"))()
+        end)
+    else
+        AutoFarmBtn.Text = "AUTO FARM LEVEL: OFF"
+        AutoFarmBtn.BackgroundColor3 = Color3.fromRGB(180, 40, 40) -- Chuyển về màu đỏ
+        StrokeFarm.Color = Color3.fromRGB(255, 100, 100)
+    end
 end)
 
--- Kích hoạt Farm Rương (Tải file autoruong.lua)
+-- 2. Bật/Tắt Auto Farm Rương
 AutoRuongBtn.MouseButton1Click:Connect(function()
     pcall(function() playSound("12221967") end)
-    AutoRuongBtn.Text = "ĐANG KÍCH HOẠT FARM RƯƠNG..."
-    pcall(function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/micovan107/bloxfruit/refs/heads/main/autoruong.lua"))()
-    end)
-    task.wait(0.5)
-    AutoRuongBtn.Text = "FARM RƯƠNG [ĐANG CHẠY]"
+    
+    getgenv().AutoFarmRuong = not getgenv().AutoFarmRuong
+    
+    if getgenv().AutoFarmRuong then
+        -- Nếu bật Farm Rương thì TỰ ĐỘNG TẮT Farm Level để tránh xung đột bay loạn xạ
+        if getgenv().AutoFarmLevel then
+            getgenv().AutoFarmLevel = false
+            AutoFarmBtn.Text = "AUTO FARM LEVEL: OFF"
+            AutoFarmBtn.BackgroundColor3 = Color3.fromRGB(180, 40, 40)
+            StrokeFarm.Color = Color3.fromRGB(255, 100, 100)
+        end
+        
+        AutoRuongBtn.Text = "AUTO FARM RƯƠNG: ON"
+        AutoRuongBtn.BackgroundColor3 = Color3.fromRGB(0, 150, 80) -- Chuyển màu xanh lá
+        StrokeRuong.Color = Color3.fromRGB(100, 255, 100)
+        
+        -- Gọi tải file logic ngầm từ GitHub về chạy
+        pcall(function()
+            loadstring(game:HttpGet("https://raw.githubusercontent.com/micovan107/bloxfruit/refs/heads/main/autoruong.lua"))()
+        end)
+    else
+        AutoRuongBtn.Text = "AUTO FARM RƯƠNG: OFF"
+        AutoRuongBtn.BackgroundColor3 = Color3.fromRGB(180, 40, 40) -- Chuyển về màu đỏ
+        StrokeRuong.Color = Color3.fromRGB(255, 100, 100)
+    end
 end)
