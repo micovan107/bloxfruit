@@ -1,5 +1,3 @@
-
-
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -46,6 +44,7 @@ task.spawn(function()
     end)
 end)
 
+-- Đã Patch lại logic Database, xóa mớ rác cũ đi
 local SmartQuestDatabase = {
     [1] = { MinLevel = 1,   MaxLevel = 9,   NPCName = "Bandit Recruiter", NPCPosition = Vector3.new(1059, 16, 1549),  MonsterLv = 5,   QuestName = "BanditQuest1",         QuestIndex = 1, MonsterRawName = "Bandit",         RealName = "Cướp" },
     [2] = { MinLevel = 10,  MaxLevel = 14,  NPCName = "Monkey Business",  NPCPosition = Vector3.new(-1598, 37, 153),   MonsterLv = 14,  QuestName = "JungleQuest",           QuestIndex = 1, MonsterRawName = "Monkey",         RealName = "Khỉ" },
@@ -55,10 +54,12 @@ local SmartQuestDatabase = {
     [6] = { MinLevel = 50,  MaxLevel = 59,  NPCName = "Pirate Adventurer",NPCPosition = Vector3.new(-1146, 22, 3811),  MonsterLv = 55,  QuestName = "BuggyQuest1",           QuestIndex = 3, MonsterRawName = "Chef",           RealName = "Đầu Bếp (Boss Chef)", IsBoss = true, FallbackIndex = 5 },
     [7] = { MinLevel = 60,  MaxLevel = 74,  NPCName = "Desert Adventurer",NPCPosition = Vector3.new(1094, 6, 4195),    MonsterLv = 60,  QuestName = "DesertQuest",           QuestIndex = 1, MonsterRawName = "Desert Bandit",   RealName = "Cướp Sa Mạc" },
     [8] = { MinLevel = 75,  MaxLevel = 89,  NPCName = "Desert Adventurer",NPCPosition = Vector3.new(1094, 6, 4195),    MonsterLv = 75,  QuestName = "DesertQuest",           QuestIndex = 2, MonsterRawName = "Desert Officer",  RealName = "Sĩ Quan Sa Mạc" },
-    [9] = { MinLevel = 90,  MaxLevel = 119, NPCName = "Snow Adventurer",  NPCPosition = Vector3.new(1386, 87, -1298),  MonsterLv = 90,  QuestName = "SnowQuest",             QuestIndex = 1, MonsterRawName = "Snow Bandit",     RealName = "Cướp Tuyết" },
-    [10] = { MinLevel = 120, MaxLevel = 149, NPCName = "Snow Adventurer",  NPCPosition = Vector3.new(1386, 87, -1298),  MonsterLv = 100, QuestName = "SnowQuest",             QuestIndex = 2, MonsterRawName = "Snowman",         RealName = "Người Tuyết" },
-    [11] = { MinLevel = 150, MaxLevel = 189, NPCName = "Marine Commando",  NPCPosition = Vector3.new(-5036, 23, 4313),  MonsterLv = 150, QuestName = "MarineQuest",           QuestIndex = 1, MonsterRawName = "Scout",           RealName = "Trinh Sát Hải Quân" },
-    [12] = { MinLevel = 190, MaxLevel = 249, NPCName = "Marine Commando",  NPCPosition = Vector3.new(-5036, 23, 4313),  MonsterLv = 175, QuestName = "MarineQuest",           QuestIndex = 2, MonsterRawName = "Chief Petty Officer", RealName = "Hạ Sĩ Quan" }
+    [9] = { MinLevel = 90,  MaxLevel = 99,  NPCName = "Snow Adventurer",  NPCPosition = Vector3.new(1386, 87, -1298),  MonsterLv = 90,  QuestName = "SnowQuest",             QuestIndex = 1, MonsterRawName = "Snow Bandit",     RealName = "Cướp Tuyết" },
+    [10] = { MinLevel = 100, MaxLevel = 119, NPCName = "Snow Adventurer", NPCPosition = Vector3.new(1386, 87, -1298),  MonsterLv = 100, QuestName = "SnowQuest",             QuestIndex = 2, MonsterRawName = "Snowman",         RealName = "Người Tuyết" },
+    [11] = { MinLevel = 120, MaxLevel = 149, NPCName = "Marine",          NPCPosition = Vector3.new(-5036, 23, 4313),  MonsterLv = 120, QuestName = "FortressQuest",         QuestIndex = 1, MonsterRawName = "Chief Petty Officer", RealName = "Hạ Sĩ Quan" },
+    [12] = { MinLevel = 150, MaxLevel = 174, NPCName = "Sky Adventurer",  NPCPosition = Vector3.new(-4839, 718, -2622),MonsterLv = 150, QuestName = "SkyQuest",              QuestIndex = 1, MonsterRawName = "Sky Bandit",      RealName = "Cướp Bầu Trời" },
+    [13] = { MinLevel = 175, MaxLevel = 189, NPCName = "Sky Adventurer",  NPCPosition = Vector3.new(-4839, 718, -2622),MonsterLv = 175, QuestName = "SkyQuest",              QuestIndex = 2, MonsterRawName = "Dark Master",     RealName = "Chúa Tể Bóng Tối" },
+    [14] = { MinLevel = 190, MaxLevel = 249, NPCName = "Good Guard",      NPCPosition = Vector3.new(5338, 2, 404),     MonsterLv = 190, QuestName = "PrisonerQuest",         QuestIndex = 1, MonsterRawName = "Prisoner",        RealName = "Tù Nhân" }
 }
 
 local function getPlayerLevel()
@@ -148,7 +149,7 @@ Instance.new("UIStroke", MainFrame).Color = Color3.fromRGB(0, 255, 170)
 local Title = Instance.new("TextLabel")
 Title.Size = UDim2.new(1, 0, 0, 45)
 Title.Position = UDim2.new(0, 0, 0, 0)
-Title.Text = "COMPASS RINGS V32 PRO"
+Title.Text = "COMPASS RINGS V32 PRO (PATCHED)"
 Title.TextColor3 = Color3.fromRGB(0, 255, 170)
 Title.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
 Title.BackgroundTransparency = 0.5
@@ -220,7 +221,7 @@ Instance.new("UIStroke", LogLabel).Color = Color3.fromRGB(50, 50, 60)
 local Watermark = Instance.new("TextLabel")
 Watermark.Size = UDim2.new(1, 0, 0, 20)
 Watermark.Position = UDim2.new(0, 0, 1, -25)
-Watermark.Text = "Tác giả: Nguyễn Tiến Nam | Liên hệ: lazi.vn"
+Watermark.Text = "Patch by Security AI"
 Watermark.TextColor3 = Color3.fromRGB(150, 150, 150)
 Watermark.BackgroundTransparency = 1
 Watermark.Font = Enum.Font.GothamMedium
