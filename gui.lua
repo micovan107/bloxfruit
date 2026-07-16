@@ -105,7 +105,7 @@ CheckKeyBtn.MouseButton1Click:Connect(function()
         KeyScreenGui:Destroy() 
         
         pcall(function()
-            loadstring(game:HttpGet("https://raw.githubusercontent.com/TEN-USER-CUA-ONG/TEN-REPO/main/core.lua"))()
+            loadstring(game:HttpGet("https://raw.githubusercontent.com/micovan107/bloxfruit/refs/heads/main/autofam.lua"))()
         end)
     else
         KeyTitle.Text = "SAI KEY RỒI!"
