@@ -1,23 +1,12 @@
--- [[ LÕI HỆ THỐNG: GIAO DIỆN CHÍNH & LOGIC V32 PRO ]]
-
+-- [[ LÕI HỆ THỐNG: CHẠY NGẦM AUTO FARM LEVEL (KHÔNG GUI) ]]
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
-local SoundService = game:GetService("SoundService")
 local LocalPlayer = Players.LocalPlayer
 local Workspace = game:GetService("Workspace")
 
-local function playSound(soundId)
-    pcall(function()
-        local sound = Instance.new("Sound")
-        sound.SoundId = "rbxassetid://"..soundId
-        sound.Parent = SoundService
-        sound:Play()
-        sound.Ended:Connect(function() sound:Destroy() end)
-    end)
-end
-
+-- Đảm bảo không nạp chồng mã độc hoặc nạp trùng lặp bypass
 if not getgenv().HubLoadedV32 then
     getgenv().HubLoadedV32 = true
     task.spawn(function()
@@ -36,6 +25,7 @@ if not getgenv().HubLoadedV32 then
     end)
 end
 
+-- Tối ưu hóa SimulationRadius để hút quái mượt hơn
 task.spawn(function()
     RunService.Heartbeat:Connect(function()
         pcall(function()
@@ -46,13 +36,14 @@ task.spawn(function()
     end)
 end)
 
+-- Cơ sở dữ liệu nhiệm vụ thông minh
 local SmartQuestDatabase = {
-    [1] = { MinLevel = 1,   MaxLevel = 9,   NPCName = "Bandit Recruiter", NPCPosition = Vector3.new(1059, 16, 1549),  MonsterLv = 5,   QuestName = "BanditQuest1",         QuestIndex = 1, MonsterRawName = "Bandit",         RealName = "Cướp" },
-    [2] = { MinLevel = 10,  MaxLevel = 14,  NPCName = "Monkey Business",  NPCPosition = Vector3.new(-1598, 37, 153),   MonsterLv = 14,  QuestName = "JungleQuest",           QuestIndex = 1, MonsterRawName = "Monkey",         RealName = "Khỉ" },
-    [3] = { MinLevel = 15,  MaxLevel = 29,  NPCName = "Monkey Business",  NPCPosition = Vector3.new(-1598, 37, 153),   MonsterLv = 20,  QuestName = "JungleQuest",           QuestIndex = 2, MonsterRawName = "Gorilla",        RealName = "Khỉ Đột" },
-    [4] = { MinLevel = 30,  MaxLevel = 39,  NPCName = "Pirate Adventurer",NPCPosition = Vector3.new(-1146, 22, 3811),  MonsterLv = 35,  QuestName = "BuggyQuest1",           QuestIndex = 1, MonsterRawName = "Pirate",         RealName = "Hải Tặc" },
-    [5] = { MinLevel = 40,  MaxLevel = 49,  NPCName = "Pirate Adventurer",NPCPosition = Vector3.new(-1146, 22, 3811),  MonsterLv = 45,  QuestName = "BuggyQuest1",           QuestIndex = 2, MonsterRawName = "Brute",          RealName = "Brute (Lính Cát)" },
-    [6] = { MinLevel = 50,  MaxLevel = 59,  NPCName = "Pirate Adventurer",NPCPosition = Vector3.new(-1146, 22, 3811),  MonsterLv = 55,  QuestName = "BuggyQuest1",           QuestIndex = 3, MonsterRawName = "Chef",           RealName = "Đầu Bếp (Boss Chef)", IsBoss = true, FallbackIndex = 5 },
+    [1] = { MinLevel = 1,   MaxLevel = 9,   NPCName = "Bandit Recruiter", NPCPosition = Vector3.new(1059, 16, 1549),  MonsterLv = 5,   QuestName = "BanditQuest1",         QuestIndex = 1, MonsterRawName = "Bandit",          RealName = "Cướp" },
+    [2] = { MinLevel = 10,  MaxLevel = 14,  NPCName = "Monkey Business",  NPCPosition = Vector3.new(-1598, 37, 153),   MonsterLv = 14,  QuestName = "JungleQuest",           QuestIndex = 1, MonsterRawName = "Monkey",          RealName = "Khỉ" },
+    [3] = { MinLevel = 15,  MaxLevel = 29,  NPCName = "Monkey Business",  NPCPosition = Vector3.new(-1598, 37, 153),   MonsterLv = 20,  QuestName = "JungleQuest",           QuestIndex = 2, MonsterRawName = "Gorilla",         RealName = "Khỉ Đột" },
+    [4] = { MinLevel = 30,  MaxLevel = 39,  NPCName = "Pirate Adventurer",NPCPosition = Vector3.new(-1146, 22, 3811),  MonsterLv = 35,  QuestName = "BuggyQuest1",           QuestIndex = 1, MonsterRawName = "Pirate",          RealName = "Hải Tặc" },
+    [5] = { MinLevel = 40,  MaxLevel = 49,  NPCName = "Pirate Adventurer",NPCPosition = Vector3.new(-1146, 22, 3811),  MonsterLv = 45,  QuestName = "BuggyQuest1",           QuestIndex = 2, MonsterRawName = "Brute",           RealName = "Brute (Lính Cát)" },
+    [6] = { MinLevel = 50,  MaxLevel = 59,  NPCName = "Pirate Adventurer",NPCPosition = Vector3.new(-1146, 22, 3811),  MonsterLv = 55,  QuestName = "BuggyQuest1",           QuestIndex = 3, MonsterRawName = "Chef",            RealName = "Đầu Bếp (Boss Chef)", IsBoss = true, FallbackIndex = 5 },
     [7] = { MinLevel = 60,  MaxLevel = 74,  NPCName = "Desert Adventurer",NPCPosition = Vector3.new(1094, 6, 4195),    MonsterLv = 60,  QuestName = "DesertQuest",           QuestIndex = 1, MonsterRawName = "Desert Bandit",   RealName = "Cướp Sa Mạc" },
     [8] = { MinLevel = 75,  MaxLevel = 89,  NPCName = "Desert Adventurer",NPCPosition = Vector3.new(1094, 6, 4195),    MonsterLv = 75,  QuestName = "DesertQuest",           QuestIndex = 2, MonsterRawName = "Desert Officer",  RealName = "Sĩ Quan Sa Mạc" },
     [9] = { MinLevel = 90,  MaxLevel = 119, NPCName = "Snow Adventurer",  NPCPosition = Vector3.new(1386, 87, -1298),  MonsterLv = 90,  QuestName = "SnowQuest",             QuestIndex = 1, MonsterRawName = "Snow Bandit",     RealName = "Cướp Tuyết" },
@@ -114,119 +105,7 @@ local function getBestTarget(targetLv, rawName)
     return nil
 end
 
-local function findNPCInWorld(npcName)
-    local npcsFolder = Workspace:FindFirstChild("NPCs")
-    local foldersToSearch = npcsFolder and {npcsFolder} or {Workspace}
-    for _, folder in ipairs(foldersToSearch) do
-        for _, obj in ipairs(folder:GetChildren()) do
-            if obj:IsA("Model") and obj.Name == npcName and obj:FindFirstChild("HumanoidRootPart") then
-                return obj.HumanoidRootPart.Position
-            end
-        end
-    end
-    return nil
-end
-
-local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "Lil0darkie6RingsGUI"
-ScreenGui.ResetOnSpawn = false
-ScreenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
-
-local MainFrame = Instance.new("Frame")
-MainFrame.Size = UDim2.new(0, 280, 0, 260)
-MainFrame.Position = UDim2.new(0.5, -140, 0.5, -130)
-MainFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 20)
-MainFrame.BorderSizePixel = 0
-MainFrame.Active = true
-MainFrame.Draggable = true
-MainFrame.Parent = ScreenGui
-
-Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0, 12)
-Instance.new("UIStroke", MainFrame).Thickness = 2.5
-Instance.new("UIStroke", MainFrame).Color = Color3.fromRGB(0, 255, 170)
-
-local Title = Instance.new("TextLabel")
-Title.Size = UDim2.new(1, 0, 0, 45)
-Title.Position = UDim2.new(0, 0, 0, 0)
-Title.Text = "COMPASS RINGS V32 PRO"
-Title.TextColor3 = Color3.fromRGB(0, 255, 170)
-Title.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-Title.BackgroundTransparency = 0.5
-Title.Font = Enum.Font.GothamBlack
-Title.TextSize = 16
-Title.Parent = MainFrame
-Instance.new("UICorner", Title).CornerRadius = UDim.new(0, 12)
-
-local ToggleButton = Instance.new("TextButton")
-ToggleButton.Size = UDim2.new(0.85, 0, 0, 40)
-ToggleButton.Position = UDim2.new(0.075, 0, 0.22, 0)
-ToggleButton.Text = "AUTO QUEST: OFF"
-ToggleButton.BackgroundColor3 = Color3.fromRGB(180, 40, 40)
-ToggleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-ToggleButton.Font = Enum.Font.GothamBold
-ToggleButton.TextSize = 14
-ToggleButton.Parent = MainFrame
-Instance.new("UICorner", ToggleButton).CornerRadius = UDim.new(0, 8)
-
-local DecreaseRadius = Instance.new("TextButton")
-DecreaseRadius.Size = UDim2.new(0.2, 0, 0, 35)
-DecreaseRadius.Position = UDim2.new(0.075, 0, 0.42, 0)
-DecreaseRadius.Text = "<"
-DecreaseRadius.BackgroundColor3 = Color3.fromRGB(30, 30, 40)
-DecreaseRadius.TextColor3 = Color3.fromRGB(0, 255, 170)
-DecreaseRadius.Font = Enum.Font.GothamBlack
-DecreaseRadius.TextSize = 20
-DecreaseRadius.Parent = MainFrame
-Instance.new("UICorner", DecreaseRadius).CornerRadius = UDim.new(0, 8)
-Instance.new("UIStroke", DecreaseRadius).Color = Color3.fromRGB(0, 255, 170)
-
-local RadiusDisplay = Instance.new("TextLabel")
-RadiusDisplay.Size = UDim2.new(0.41, 0, 0, 35)
-RadiusDisplay.Position = UDim2.new(0.295, 0, 0.42, 0)
-RadiusDisplay.Text = "Radius: 50"
-RadiusDisplay.BackgroundColor3 = Color3.fromRGB(10, 10, 15)
-RadiusDisplay.TextColor3 = Color3.fromRGB(255, 255, 255)
-RadiusDisplay.Font = Enum.Font.GothamBold
-RadiusDisplay.TextSize = 13
-RadiusDisplay.Parent = MainFrame
-Instance.new("UICorner", RadiusDisplay).CornerRadius = UDim.new(0, 8)
-Instance.new("UIStroke", RadiusDisplay).Color = Color3.fromRGB(0, 255, 170)
-
-local IncreaseRadius = Instance.new("TextButton")
-IncreaseRadius.Size = UDim2.new(0.2, 0, 0, 35)
-IncreaseRadius.Position = UDim2.new(0.725, 0, 0.42, 0)
-IncreaseRadius.Text = ">"
-IncreaseRadius.BackgroundColor3 = Color3.fromRGB(30, 30, 40)
-IncreaseRadius.TextColor3 = Color3.fromRGB(0, 255, 170)
-IncreaseRadius.Font = Enum.Font.GothamBlack
-IncreaseRadius.TextSize = 20
-IncreaseRadius.Parent = MainFrame
-Instance.new("UICorner", IncreaseRadius).CornerRadius = UDim.new(0, 8)
-Instance.new("UIStroke", IncreaseRadius).Color = Color3.fromRGB(0, 255, 170)
-
-local LogLabel = Instance.new("TextLabel")
-LogLabel.Size = UDim2.new(0.85, 0, 0, 50)
-LogLabel.Position = UDim2.new(0.075, 0, 0.60, 0)
-LogLabel.Text = "[HỆ THỐNG]\nSẵn sàng hoạt động."
-LogLabel.BackgroundColor3 = Color3.fromRGB(5, 5, 8)
-LogLabel.TextColor3 = Color3.fromRGB(0, 255, 170)
-LogLabel.Font = Enum.Font.Code
-LogLabel.TextSize = 11
-LogLabel.TextWrapped = true
-LogLabel.Parent = MainFrame
-Instance.new("UICorner", LogLabel).CornerRadius = UDim.new(0, 6)
-Instance.new("UIStroke", LogLabel).Color = Color3.fromRGB(50, 50, 60)
-
-local Watermark = Instance.new("TextLabel")
-Watermark.Size = UDim2.new(1, 0, 0, 20)
-Watermark.Position = UDim2.new(0, 0, 1, -25)
-Watermark.Text = "Tác giả: Nguyễn Tiến Nam | Liên hệ: lazi.vn"
-Watermark.TextColor3 = Color3.fromRGB(150, 150, 150)
-Watermark.BackgroundTransparency = 1
-Watermark.Font = Enum.Font.GothamMedium
-Watermark.TextSize = 11
-Watermark.Parent = MainFrame
-
+-- Biến cấu hình chuyển động xoay
 local radius = 50
 local height = 100
 local rotationSpeed = 0.5
@@ -234,8 +113,9 @@ local attractionStrength = 1000
 local ringPartsEnabled = false
 getgenv().CurrentTargetName = nil
 
+-- Vòng lặp hút quái (Chỉ chạy khi getgenv().AutoFarmLevel hoạt động)
 RunService.Heartbeat:Connect(function()
-    if not ringPartsEnabled or not getgenv().CurrentTargetName then return end
+    if not getgenv().AutoFarmLevel or not ringPartsEnabled or not getgenv().CurrentTargetName then return end
     local char = LocalPlayer.Character
     local humanoidRootPart = char and char:FindFirstChild("HumanoidRootPart")
     if humanoidRootPart then
@@ -268,9 +148,7 @@ RunService.Heartbeat:Connect(function()
     end
 end)
 
-local AutoQuestEnabled = false
 local NoClipConnection = nil
-local ForcePositionConnection = nil
 local HoverConnection = nil 
 
 local function isQuestActive()
@@ -291,13 +169,12 @@ end
 
 local function stopNoClip()
     if NoClipConnection then NoClipConnection:Disconnect() NoClipConnection = nil end
-    if ForcePositionConnection then ForcePositionConnection:Disconnect() ForcePositionConnection = nil end
 end
 
 local function startHover()
     if HoverConnection then HoverConnection:Disconnect() end
     HoverConnection = RunService.RenderStepped:Connect(function()
-        if ringPartsEnabled and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+        if getgenv().AutoFarmLevel and ringPartsEnabled and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
             local hrp = LocalPlayer.Character.HumanoidRootPart
             hrp.Velocity = Vector3.new(hrp.Velocity.X, 25, hrp.Velocity.Z) 
         end
@@ -320,7 +197,7 @@ local function tweenTo(targetPos)
         local tween = TweenService:Create(hrp, TweenInfo.new(dist / speed, Enum.EasingStyle.Linear), {CFrame = CFrame.new(targetPos)})
         tween:Play()
         while tween.PlaybackState == Enum.PlaybackState.Playing do
-            if not AutoQuestEnabled then tween:Cancel() stopNoClip() return false end
+            if not getgenv().AutoFarmLevel then tween:Cancel() stopNoClip() return false end
             task.wait(0.1)
         end
     end
@@ -330,86 +207,45 @@ local function tweenTo(targetPos)
     return true
 end
 
-local function startQuestLoop()
-    task.spawn(function()
-        while AutoQuestEnabled do
-            local quest, isFallback, originalBossQuest = getQuestByPlayerLevel()
-            if quest then
-                getgenv().CurrentTargetName = quest.MonsterRawName
-                if isFallback and originalBossQuest then
-                    LogLabel.Text = "[RADAR]\nBoss " .. originalBossQuest.RealName .. " chưa hồi sinh! Đổi target: " .. quest.RealName
-                else
-                    LogLabel.Text = "[RADAR]\nĐang khóa vùng quái: " .. quest.RealName
-                end
-                
-                if isQuestActive() then
-                    local bestMonsterModel = getBestTarget(quest.MonsterLv, quest.MonsterRawName)
-                    if bestMonsterModel then
-                        LogLabel.Text = "[RADAR]\nPhát hiện " .. cleanMonsterName(bestMonsterModel.Name) .. "! Tấn công..."
-                        local monsterPos = bestMonsterModel.HumanoidRootPart.Position
-                        if tweenTo(monsterPos) and AutoQuestEnabled then
-                            ringPartsEnabled = true
-                            startHover()
-                            LogLabel.Text = "[RADAR]\nĐang hút và tiêu diệt mục tiêu!"
-                        end
-                    else
-                        LogLabel.Text = "[RADAR]\nQuái chưa hồi sinh, đang bay quanh đảo ép tải map..."
-                        ringPartsEnabled = false
-                        stopHover()
-                        tweenTo(quest.NPCPosition)
+-- Vòng lặp điều khiển nhiệm vụ chính
+task.spawn(function()
+    while getgenv().AutoFarmLevel do
+        local quest, isFallback, originalBossQuest = getQuestByPlayerLevel()
+        if quest then
+            getgenv().CurrentTargetName = quest.MonsterRawName
+            
+            if isQuestActive() then
+                local bestMonsterModel = getBestTarget(quest.MonsterLv, quest.MonsterRawName)
+                if bestMonsterModel then
+                    local monsterPos = bestMonsterModel.HumanoidRootPart.Position
+                    if tweenTo(monsterPos) and getgenv().AutoFarmLevel then
+                        ringPartsEnabled = true
+                        startHover()
                     end
                 else
                     ringPartsEnabled = false
                     stopHover()
-                    LogLabel.Text = "[LA BÀN]\nDi chuyển tới NPC " .. quest.NPCName .. "..."
-                    local targetNpcPos = realNpcPos or quest.NPCPosition
-                    if tweenTo(targetNpcPos + Vector3.new(0, 2, 0)) and AutoQuestEnabled then
-                        LogLabel.Text = "[LA BÀN]\nNhận nhiệm vụ: " .. quest.RealName
-                        pcall(function() ReplicatedStorage.Remotes.CommF_:InvokeServer("AbandonQuest") end)
-                        task.wait(0.5)
-                        pcall(function() ReplicatedStorage.Remotes.CommF_:InvokeServer("StartQuest", quest.QuestName, quest.QuestIndex) end)
-                        task.wait(1.5)
-                    end
+                    tweenTo(quest.NPCPosition)
                 end
             else
-                LogLabel.Text = "[LỖI]\nKhông tìm thấy cấu hình đảo thích hợp!"
                 ringPartsEnabled = false
                 stopHover()
+                local targetNpcPos = quest.NPCPosition
+                if tweenTo(targetNpcPos + Vector3.new(0, 2, 0)) and getgenv().AutoFarmLevel then
+                    pcall(function() ReplicatedStorage.Remotes.CommF_:InvokeServer("AbandonQuest") end)
+                    task.wait(0.5)
+                    pcall(function() ReplicatedStorage.Remotes.CommF_:InvokeServer("StartQuest", quest.QuestName, quest.QuestIndex) end)
+                    task.wait(1.5)
+                end
             end
-            task.wait(2)
+        else
+            ringPartsEnabled = false
+            stopHover()
         end
-        stopNoClip()
-        stopHover()
-        ringPartsEnabled = false
-    end)
-end
-
-ToggleButton.MouseButton1Click:Connect(function()
-    AutoQuestEnabled = not AutoQuestEnabled
-    pcall(function() playSound("12221967") end)
-    if AutoQuestEnabled then
-        ToggleButton.Text = "AUTO QUEST: ON"
-        ToggleButton.BackgroundColor3 = Color3.fromRGB(0, 200, 100)
-        LogLabel.Text = "[HỆ THỐNG]\nKhởi động Radar V32 thành công!"
-        startQuestLoop()
-    else
-        ToggleButton.Text = "AUTO QUEST: OFF"
-        ToggleButton.BackgroundColor3 = Color3.fromRGB(180, 40, 40)
-        LogLabel.Text = "[HỆ THỐNG]\nĐã ngắt kết nối tự động."
-        ringPartsEnabled = false
-        stopNoClip()
-        stopHover()
+        task.wait(2)
     end
-end)
-
-DecreaseRadius.MouseButton1Click:Connect(function()
-    radius = math.max(0, radius - 5)
-    RadiusDisplay.Text = "Radius: " .. radius
-    pcall(function() playSound("12221967") end)
-end)
-
-IncreaseRadius.MouseButton1Click:Connect(function()
-    radius = math.min(10000, radius + 5)
-    RadiusDisplay.Text = "Radius: " .. radius
-    pcall(function() playSound("12221967") end)
+    -- Dọn dẹp các tiến trình khi trạng thái AutoFarmLevel = false
+    stopNoClip()
+    stopHover()
+    ringPartsEnabled = false
 end)
