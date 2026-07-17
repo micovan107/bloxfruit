@@ -1,3 +1,5 @@
+-- [[ COMPASS RINGS V33 PRO - EXPERT PATCHED ]] --
+
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -52,19 +54,20 @@ local SmartQuestDatabase = {}
 local MonsterPositions = {}
 
 local function LoadCloudData()
-    -- Tạo mã tránh cache ngẫu nhiên để ép tải dữ liệu mới nhất
     local cacheBuster = "?t=" .. tostring(math.random(1, 100000))
 
     -- 1. Tải Nhiệm vụ
     local success1, rawQuest = pcall(function()
         return game:HttpGet("https://raw.githubusercontent.com/micovan107/bloxfruit/refs/heads/main/nhiemvusea1.json" .. cacheBuster)
     end)
+    
     if success1 and rawQuest then
         local ok, data = pcall(function() return HttpService:JSONDecode(rawQuest) end)
         if ok then
             table.clear(SmartQuestDatabase)
             for _, item in ipairs(data) do
                 table.insert(SmartQuestDatabase, {
+                    Index = item.Index,
                     MinLevel = item.MinLevel,
                     MaxLevel = item.MaxLevel,
                     NPCName = item.NPCName,
@@ -90,6 +93,7 @@ local function LoadCloudData()
     local success2, rawPos = pcall(function()
         return game:HttpGet("https://raw.githubusercontent.com/micovan107/bloxfruit/refs/heads/main/vitrikhuquaisea1.json" .. cacheBuster)
     end)
+    
     if success2 and rawPos then
         local ok, data = pcall(function() return HttpService:JSONDecode(rawPos) end)
         if ok then
@@ -106,8 +110,10 @@ local function LoadCloudData()
     end
 end
 
--- Chạy hàm tải data ngay lập tức
 LoadCloudData()
+
+-- ==========================================
+-- LOGIC CỐT LÕI (CORE FUNCTIONS)
 -- ==========================================
 
 local function getPlayerLevel()
@@ -117,13 +123,14 @@ local function getPlayerLevel()
     return 1
 end
 
-local function isMonsterSpawned(targetLv, rawName)
-    local targetPattern = "%[Lv%.%s*" .. tostring(targetLv) .. "%]"
+local function isMonsterSpawned(rawName)
+    if not rawName then return false end
     local enemiesFolder = Workspace:FindFirstChild("Enemies") or Workspace
     for _, obj in ipairs(enemiesFolder:GetChildren()) do
         if obj:IsA("Model") and obj:FindFirstChild("HumanoidRootPart") and obj:FindFirstChild("Humanoid") and obj.Humanoid.Health > 0 then
-            local modelName, dName = obj.Name, obj.Humanoid.DisplayName or ""
-            if string.find(modelName, targetPattern) or string.find(dName, targetPattern) or (rawName and string.find(string.lower(modelName), string.lower(rawName))) then return true end
+            if string.find(string.lower(obj.Name), string.lower(rawName)) then 
+                return true 
+            end
         end
     end
     return false
@@ -132,17 +139,32 @@ end
 local function getQuestByPlayerLevel()
     if #SmartQuestDatabase == 0 then return nil, false, nil end
     local myLevel = getPlayerLevel()
-    for index, quest in ipairs(SmartQuestDatabase) do
+    local targetQuest = nil
+
+    -- Tìm quest phù hợp với level
+    for _, quest in ipairs(SmartQuestDatabase) do
         if myLevel >= quest.MinLevel and myLevel <= quest.MaxLevel then
-            if quest.IsBoss and not isMonsterSpawned(quest.MonsterLv, quest.MonsterRawName) then
-                if quest.FallbackIndex and SmartQuestDatabase[quest.FallbackIndex] then
-                    return SmartQuestDatabase[quest.FallbackIndex], true, quest
-                end
-            end
-            return quest, false, nil
+            targetQuest = quest
+            break
         end
     end
-    return SmartQuestDatabase[#SmartQuestDatabase], false, nil
+
+    if not targetQuest then 
+        return SmartQuestDatabase[#SmartQuestDatabase], false, nil 
+    end
+
+    -- Xử lý an toàn cho Boss (Tìm theo Index thay vì vị trí mảng để tránh lỗi JSON)
+    if targetQuest.IsBoss and not isMonsterSpawned(targetQuest.MonsterRawName) then
+        if targetQuest.FallbackIndex then
+            for _, fallbackQ in ipairs(SmartQuestDatabase) do
+                if fallbackQ.Index == targetQuest.FallbackIndex then
+                    return fallbackQ, true, targetQuest
+                end
+            end
+        end
+    end
+
+    return targetQuest, false, nil
 end
 
 local function cleanMonsterName(name)
@@ -153,7 +175,9 @@ local function cleanMonsterName(name)
 end
 
 local function getBestTarget(targetLv, rawName)
-    local enemiesFolder, targetPattern = Workspace:FindFirstChild("Enemies") or Workspace, "%[Lv%.%s*" .. tostring(targetLv) .. "%]"
+    local enemiesFolder = Workspace:FindFirstChild("Enemies") or Workspace
+    local targetPattern = "%[Lv%.%s*" .. tostring(targetLv) .. "%]"
+    
     for _, obj in ipairs(enemiesFolder:GetChildren()) do
         if obj:IsA("Model") and obj:FindFirstChild("HumanoidRootPart") and obj:FindFirstChild("Humanoid") and obj.Humanoid.Health > 0 then
             if string.find(obj.Name, targetPattern) or string.find(obj.Humanoid.DisplayName or "", targetPattern) or (rawName and string.find(string.lower(obj.Name), string.lower(rawName))) then
@@ -163,6 +187,10 @@ local function getBestTarget(targetLv, rawName)
     end
     return nil
 end
+
+-- ==========================================
+-- GIAO DIỆN NGƯỜI DÙNG (GUI)
+-- ==========================================
 
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "Lil0darkie6RingsGUI"
@@ -185,7 +213,7 @@ Instance.new("UIStroke", MainFrame).Color = Color3.fromRGB(0, 255, 170)
 local Title = Instance.new("TextLabel")
 Title.Size = UDim2.new(1, 0, 0, 45)
 Title.Position = UDim2.new(0, 0, 0, 0)
-Title.Text = "COMPASS RINGS V33 PRO (PATCHED)"
+Title.Text = "COMPASS RINGS V33 (PRO PATCH)"
 Title.TextColor3 = Color3.fromRGB(0, 255, 170)
 Title.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
 Title.BackgroundTransparency = 0.5
@@ -264,6 +292,10 @@ Watermark.Font = Enum.Font.GothamMedium
 Watermark.TextSize = 11
 Watermark.Parent = MainFrame
 
+-- ==========================================
+-- LOGIC HÚT QUÁI (MAGNET & HOVER)
+-- ==========================================
+
 local radius = 50
 local height = 100
 local rotationSpeed = 0.5
@@ -275,6 +307,7 @@ RunService.Heartbeat:Connect(function()
     if not ringPartsEnabled or not getgenv().CurrentTargetName then return end
     local char = LocalPlayer.Character
     local humanoidRootPart = char and char:FindFirstChild("HumanoidRootPart")
+    
     if humanoidRootPart then
         local center = humanoidRootPart.Position
         local targetName = getgenv().CurrentTargetName
@@ -373,44 +406,46 @@ local function startQuestLoop()
             local quest, isFallback, originalBossQuest = getQuestByPlayerLevel()
             if quest then
                 getgenv().CurrentTargetName = quest.MonsterRawName
+                
                 if isFallback and originalBossQuest then
-                    LogLabel.Text = "[RADAR]\nBoss " .. originalBossQuest.RealName .. " chưa hồi sinh! Đổi target: " .. quest.RealName
+                    LogLabel.Text = "[RADAR]\nBoss " .. originalBossQuest.RealName .. " chưa xuất hiện! Chuyển mục tiêu: " .. quest.RealName
                 else
-                    LogLabel.Text = "[RADAR]\nĐang khóa vùng quái: " .. quest.RealName
+                    LogLabel.Text = "[RADAR]\nĐang quét mục tiêu: " .. quest.RealName
                 end
                 
                 if isQuestActive() then
                     local bestMonsterModel = getBestTarget(quest.MonsterLv, quest.MonsterRawName)
                     if bestMonsterModel then
-                        -- Có quái -> Lao vào phang
-                        LogLabel.Text = "[RADAR]\nPhát hiện " .. cleanMonsterName(bestMonsterModel.Name) .. "! Tấn công..."
+                        -- Có quái -> Càn quét
+                        LogLabel.Text = "[RADAR]\nPhát hiện " .. cleanMonsterName(bestMonsterModel.Name) .. "! Khóa mục tiêu..."
                         local monsterPos = bestMonsterModel.HumanoidRootPart.Position
                         if tweenTo(monsterPos) and AutoQuestEnabled then
                             ringPartsEnabled = true
                             startHover()
-                            LogLabel.Text = "[RADAR]\nĐang hút và tiêu diệt mục tiêu!"
+                            LogLabel.Text = "[RADAR]\nĐang tiêu diệt dọn dẹp bãi!"
                         end
                     else
-                        -- [PATCHED RADAR] - Logic bay ra bãi chờ quái nếu chưa hồi sinh
+                        -- Không có quái -> Đợi ở bãi
                         ringPartsEnabled = false
                         stopHover()
                         
                         local campPos = MonsterPositions[quest.MonsterRawName]
                         if campPos then
-                            LogLabel.Text = "[RADAR]\nQuái chưa hồi sinh, ra bãi (".. quest.RealName ..") cắm cọc chờ..."
-                            tweenTo(campPos + Vector3.new(0, 15, 0)) -- Bay cao lên 15 stud so với mặt đất bãi quái cho an toàn
+                            LogLabel.Text = "[RADAR]\nBãi (".. quest.RealName ..") trống. Đang phục kích chờ hồi sinh..."
+                            tweenTo(campPos + Vector3.new(0, 15, 0)) 
                         else
-                            LogLabel.Text = "[RADAR]\nKhông có tọa độ bãi, bay về NPC đợi..."
+                            LogLabel.Text = "[RADAR]\nMất dấu tọa độ. Quay về NPC..."
                             tweenTo(quest.NPCPosition)
                         end
                     end
                 else
+                    -- Đi nhận quest
                     ringPartsEnabled = false
                     stopHover()
                     LogLabel.Text = "[LA BÀN]\nDi chuyển tới NPC " .. quest.NPCName .. "..."
                     local targetNpcPos = quest.NPCPosition
                     if tweenTo(targetNpcPos + Vector3.new(0, 2, 0)) and AutoQuestEnabled then
-                        LogLabel.Text = "[LA BÀN]\nNhận nhiệm vụ: " .. quest.RealName
+                        LogLabel.Text = "[LA BÀN]\nBắt ép nhận nhiệm vụ: " .. quest.RealName
                         pcall(function() ReplicatedStorage.Remotes.CommF_:InvokeServer("AbandonQuest") end)
                         task.wait(0.5)
                         pcall(function() ReplicatedStorage.Remotes.CommF_:InvokeServer("StartQuest", quest.QuestName, quest.QuestIndex) end)
@@ -418,7 +453,7 @@ local function startQuestLoop()
                     end
                 end
             else
-                LogLabel.Text = "[LỖI]\nData rỗng hoặc không tìm thấy đảo thích hợp!"
+                LogLabel.Text = "[LỖI]\nData rỗng! Kiểm tra lại đường truyền JSON."
                 ringPartsEnabled = false
                 stopHover()
             end
@@ -430,23 +465,28 @@ local function startQuestLoop()
     end)
 end
 
+-- ==========================================
+-- KẾT NỐI SỰ KIỆN NÚT BẤM (BUTTON EVENTS)
+-- ==========================================
+
 ToggleButton.MouseButton1Click:Connect(function()
     AutoQuestEnabled = not AutoQuestEnabled
     pcall(function() playSound("12221967") end)
+    
     if AutoQuestEnabled then
         if #SmartQuestDatabase == 0 then
-            LogLabel.Text = "[LỖI]\nChưa tải được Database từ Github! Đang thử lại..."
+            LogLabel.Text = "[LỖI]\nChưa tải được Database! Kích hoạt lại Force Load..."
             LoadCloudData()
         end
         
         ToggleButton.Text = "AUTO QUEST: ON"
         ToggleButton.BackgroundColor3 = Color3.fromRGB(0, 200, 100)
-        LogLabel.Text = "[HỆ THỐNG]\nKhởi động Radar V32 (Cloud Version)!"
+        LogLabel.Text = "[HỆ THỐNG]\nRadar V33 Pro đã khởi động."
         startQuestLoop()
     else
         ToggleButton.Text = "AUTO QUEST: OFF"
         ToggleButton.BackgroundColor3 = Color3.fromRGB(180, 40, 40)
-        LogLabel.Text = "[HỆ THỐNG]\nĐã ngắt kết nối tự động."
+        LogLabel.Text = "[HỆ THỐNG]\nĐã ngắt hệ thống chiến đấu."
         ringPartsEnabled = false
         stopNoClip()
         stopHover()
