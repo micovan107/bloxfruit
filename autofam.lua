@@ -66,7 +66,7 @@ local SmartQuestDatabase = {
     [17] = { MinLevel = 230, MaxLevel = 239, NPCName = "Warden",            NPCPosition = Vector3.new(5190, 4, 686),   MonsterLv = 230, QuestName = "ImpelQuest",        QuestIndex = 2, MonsterRawName = "Chief Warden",       RealName = "Trưởng Ngục Chief Warden", IsBoss = true, FallbackIndex = 15 },
     [18] = { MinLevel = 240, MaxLevel = 249, NPCName = "Chief Warden",      NPCPosition = Vector3.new(5190, 4, 686),   MonsterLv = 240, QuestName = "ImpelQuest",        QuestIndex = 3, MonsterRawName = "Swan",               RealName = "Mingo Giả Đố (Swan)", IsBoss = true, FallbackIndex = 15 },
     -- COLOSSEUM (ĐẤU TRƯỜNG - LEVEL 250+)
-    [19] = { MinLevel = 250, MaxLevel = 274, NPCName = "Colosseum Quest Giver", NPCPosition = Vector3.new(-1580, 7, -2980), MonsterLv = 250, QuestName = "ColosseumQuest", QuestIndex = 1, MonsterRawName = "Toga Warrior", RealName = "Chiến Sĩ Toga", FallbackIndex = 18 },
+    [19] = { MinLevel = 250, MaxLevel = 274, NPCName = "Colosseum Quest Giver", NPCPosition = Vector3.new(-1580, 7, -2980), MonsterLv = 250, QuestName = "ColosseumQuest", QuestIndex = 1, MonsterRawName = "Toga Warrior", RealName = "Chiến Sĩ Toga" },
     [20] = { MinLevel = 275, MaxLevel = 299, NPCName = "Colosseum Quest Giver", NPCPosition = Vector3.new(-1580, 7, -2980), MonsterLv = 275, QuestName = "ColosseumQuest", QuestIndex = 2, MonsterRawName = "Gladiator", RealName = "Đấu Sĩ Gladiator", FallbackIndex = 19 },
 
     -- MAGMA VILLAGE (ĐẢO NÚI LỬA - LEVEL 300+)
