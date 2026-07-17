@@ -1,4 +1,4 @@
--- [[ COMPASS RINGS V33 PRO - EXPERT PATCHED (SPEED + TELEPORT + BOSS FIX) ]] --
+-- [[ COMPASS RINGS V36 PRO MAX - SMART FALLBACK + FIX LOOP ]] --
 
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
@@ -48,7 +48,7 @@ task.spawn(function()
 end)
 
 -- ==========================================
--- [PATCHED DATABASE] - TẢI DATA TỪ GITHUB (ANTI-CACHE)
+-- [DATABASE]
 -- ==========================================
 local SmartQuestDatabase = {}
 local MonsterPositions = {}
@@ -76,11 +76,10 @@ local function LoadCloudData()
                     QuestIndex = item.QuestIndex,
                     MonsterRawName = item.MonsterRawName,
                     RealName = item.RealName,
-                    IsBoss = item.IsBoss or false,
-                    FallbackIndex = item.FallbackIndex
+                    IsBoss = item.IsBoss or false
                 })
             end
-            print("[HỆ THỐNG] Đã load xong Database Nhiệm Vụ mới nhất!")
+            print("[HỆ THỐNG] Đã load xong Database Nhiệm Vụ!")
         end
     end
 
@@ -95,7 +94,7 @@ local function LoadCloudData()
             for name, pos in pairs(data) do
                 MonsterPositions[name] = Vector3.new(pos.X, pos.Y, pos.Z)
             end
-            print("[HỆ THỐNG] Đã load xong Database Tọa Độ Quái mới nhất!")
+            print("[HỆ THỐNG] Đã load xong Database Tọa Độ Quái!")
         end
     end
 end
@@ -103,7 +102,7 @@ end
 LoadCloudData()
 
 -- ==========================================
--- LOGIC CỐT LÕI (CORE FUNCTIONS)
+-- CORE LOGIC & TÌM NHIỆM VỤ THÔNG MINH
 -- ==========================================
 local function getPlayerLevel()
     if LocalPlayer:FindFirstChild("Data") and LocalPlayer.Data:FindFirstChild("Level") then return LocalPlayer.Data.Level.Value end
@@ -112,17 +111,20 @@ local function getPlayerLevel()
     return 1
 end
 
-local function isMonsterSpawned(rawName)
-    if not rawName then return false end
-    local enemiesFolder = Workspace:FindFirstChild("Enemies") or Workspace
-    for _, obj in ipairs(enemiesFolder:GetChildren()) do
-        if obj:IsA("Model") and obj:FindFirstChild("HumanoidRootPart") and obj:FindFirstChild("Humanoid") and obj.Humanoid.Health > 0 then
-            if string.find(string.lower(obj.Name), string.lower(rawName)) then 
-                return true 
+getgenv().FallbackCounter = getgenv().FallbackCounter or 0
+local IntentionalAbandon = false 
+
+-- Tự động mò nhiệm vụ thường cao nhất nếu Boss vắng mặt
+local function getFallbackQuest(myLevel)
+    local bestFallback = nil
+    for _, q in ipairs(SmartQuestDatabase) do
+        if myLevel >= q.MinLevel and not q.IsBoss then
+            if not bestFallback or q.MinLevel > bestFallback.MinLevel then
+                bestFallback = q
             end
         end
     end
-    return false
+    return bestFallback or SmartQuestDatabase[1]
 end
 
 local function getQuestByPlayerLevel()
@@ -130,6 +132,13 @@ local function getQuestByPlayerLevel()
     local myLevel = getPlayerLevel()
     local targetQuest = nil
 
+    -- Nếu đang trong chế độ cày bù quái thường (FallbackCounter > 0)
+    if getgenv().FallbackCounter > 0 then
+        local fallback = getFallbackQuest(myLevel)
+        return fallback, true, nil
+    end
+
+    -- Tìm nhiệm vụ đúng cấp độ
     for _, quest in ipairs(SmartQuestDatabase) do
         if myLevel >= quest.MinLevel and myLevel <= quest.MaxLevel then
             targetQuest = quest
@@ -138,16 +147,6 @@ local function getQuestByPlayerLevel()
     end
 
     if not targetQuest then return SmartQuestDatabase[#SmartQuestDatabase], false, nil end
-
-    if targetQuest.IsBoss and not isMonsterSpawned(targetQuest.MonsterRawName) then
-        if targetQuest.FallbackIndex then
-            for _, fallbackQ in ipairs(SmartQuestDatabase) do
-                if fallbackQ.Index == targetQuest.FallbackIndex then
-                    return fallbackQ, true, targetQuest
-                end
-            end
-        end
-    end
 
     return targetQuest, false, nil
 end
@@ -174,7 +173,7 @@ local function getBestTarget(targetLv, rawName)
 end
 
 -- ==========================================
--- GIAO DIỆN NGƯỜI DÙNG (GUI)
+-- GUI (Giao diện)
 -- ==========================================
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "Lil0darkie6RingsGUI"
@@ -197,12 +196,12 @@ Instance.new("UIStroke", MainFrame).Color = Color3.fromRGB(0, 255, 170)
 local Title = Instance.new("TextLabel")
 Title.Size = UDim2.new(1, 0, 0, 45)
 Title.Position = UDim2.new(0, 0, 0, 0)
-Title.Text = "COMPASS RINGS V33 (PRO PATCH)"
+Title.Text = "RINGS V36 (SMART FALLBACK)"
 Title.TextColor3 = Color3.fromRGB(0, 255, 170)
 Title.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
 Title.BackgroundTransparency = 0.5
 Title.Font = Enum.Font.GothamBlack
-Title.TextSize = 16
+Title.TextSize = 14
 Title.Parent = MainFrame
 Instance.new("UICorner", Title).CornerRadius = UDim.new(0, 12)
 
@@ -256,7 +255,7 @@ Instance.new("UIStroke", IncreaseRadius).Color = Color3.fromRGB(0, 255, 170)
 local LogLabel = Instance.new("TextLabel")
 LogLabel.Size = UDim2.new(0.85, 0, 0, 50)
 LogLabel.Position = UDim2.new(0.075, 0, 0.60, 0)
-LogLabel.Text = "[HỆ THỐNG]\nSẵn sàng hoạt động."
+LogLabel.Text = "[HỆ THỐNG]\nSẵn sàng."
 LogLabel.BackgroundColor3 = Color3.fromRGB(5, 5, 8)
 LogLabel.TextColor3 = Color3.fromRGB(0, 255, 170)
 LogLabel.Font = Enum.Font.Code
@@ -269,7 +268,7 @@ Instance.new("UIStroke", LogLabel).Color = Color3.fromRGB(50, 50, 60)
 local Watermark = Instance.new("TextLabel")
 Watermark.Size = UDim2.new(1, 0, 0, 20)
 Watermark.Position = UDim2.new(0, 0, 1, -25)
-Watermark.Text = "Patch by Security AI"
+Watermark.Text = "Fixed V36 by AI"
 Watermark.TextColor3 = Color3.fromRGB(150, 150, 150)
 Watermark.BackgroundTransparency = 1
 Watermark.Font = Enum.Font.GothamMedium
@@ -277,7 +276,7 @@ Watermark.TextSize = 11
 Watermark.Parent = MainFrame
 
 -- ==========================================
--- LOGIC HÚT QUÁI (MAGNET & HOVER)
+-- HỆ THỐNG HÚT QUÁI
 -- ==========================================
 local radius = 50
 local height = 100
@@ -323,7 +322,6 @@ end)
 
 local AutoQuestEnabled = false
 local NoClipConnection = nil
-local ForcePositionConnection = nil
 local HoverConnection = nil 
 
 local function isQuestActive()
@@ -344,7 +342,6 @@ end
 
 local function stopNoClip()
     if NoClipConnection then NoClipConnection:Disconnect() NoClipConnection = nil end
-    if ForcePositionConnection then ForcePositionConnection:Disconnect() ForcePositionConnection = nil end
 end
 
 local function startHover()
@@ -361,112 +358,130 @@ local function stopHover()
     if HoverConnection then HoverConnection:Disconnect() HoverConnection = nil end
 end
 
--- ==========================================
--- HỆ THỐNG DI CHUYỂN SIÊU TỐC & DỊCH CHUYỂN
--- ==========================================
+-- Dịch chuyển tức thời
 local function tweenTo(targetPos)
     local char = LocalPlayer.Character
     if not char or not char:FindFirstChild("HumanoidRootPart") then return false end
     local hrp = char.HumanoidRootPart
-    local dist = (hrp.Position - targetPos).Magnitude
     
-    -- Dịch chuyển tức thời nếu khoảng cách gần (< 300 studs)
-    if dist <= 300 and dist > 5 then
-        hrp.CFrame = CFrame.new(targetPos)
-        task.wait(0.1)
-        return true
-    end
-
-    -- Nếu xa thì Tween với tốc độ bàn thờ (450)
-    if dist > 300 then
-        startNoClip()
-        local speed = 450 -- Đã buff tốc độ
-        local tween = TweenService:Create(hrp, TweenInfo.new(dist / speed, Enum.EasingStyle.Linear), {CFrame = CFrame.new(targetPos)})
-        tween:Play()
-        while tween.PlaybackState == Enum.PlaybackState.Playing do
-            if not AutoQuestEnabled then tween:Cancel() stopNoClip() return false end
-            task.wait(0.1)
-        end
-    end
-    
+    startNoClip()
+    hrp.CFrame = CFrame.new(targetPos)
+    task.wait(0.08)
     stopNoClip()
-    if char:FindFirstChild("HumanoidRootPart") then char.HumanoidRootPart.Velocity = Vector3.new(0, 0, 0) end
-    task.wait(0.2)
+    
+    if char:FindFirstChild("HumanoidRootPart") then hrp.Velocity = Vector3.new(0, 0, 0) end
     return true
 end
 
 -- ==========================================
--- HỆ THỐNG ĐỔI QUEST THÔNG MINH - FIX LỖI TỰ HỦY
+-- VÒNG LẶP CHÍNH (ĐÃ SỬA CHẶT CHẼ)
 -- ==========================================
 local function startQuestLoop()
     task.spawn(function()
+        local lastQuestState = false
+        
         while AutoQuestEnabled do
             local quest, isFallback, originalBossQuest = getQuestByPlayerLevel()
+            
             if quest then
                 getgenv().CurrentTargetName = quest.MonsterRawName
+                local activeNow = isQuestActive()
                 
-                -- BƯỚC 1: KIỂM TRA VÀ DI CHUYỂN TRƯỚC KHI XỬ LÝ QUEST
-                if isQuestActive() then
+                -- Khấu trừ bộ đếm khi hoàn thành nhiệm vụ thường
+                if lastQuestState == true and activeNow == false then
+                    if IntentionalAbandon then
+                        IntentionalAbandon = false -- Reset cờ, bỏ qua đợt hủy này
+                    else
+                        if getgenv().FallbackCounter > 0 then
+                            getgenv().FallbackCounter = getgenv().FallbackCounter - 1
+                            LogLabel.Text = "[HỆ THỐNG]\nXong 1 Q thường. Còn lại: " .. getgenv().FallbackCounter
+                        end
+                    end
+                end
+                lastQuestState = activeNow
+                
+                if activeNow then
+                    -- KIỂM TRA CHỐT CHẶN: Đang cầm nhiệm vụ gì trên màn hình?
+                    local currentQuestName = ""
+                    pcall(function() currentQuestName = LocalPlayer.PlayerGui.Main.Quest.Container.QuestTitle.Text end)
+                    local targetClean = cleanMonsterName(quest.RealName)
+                    
+                    if currentQuestName ~= "" and not string.find(string.lower(currentQuestName), string.lower(targetClean)) then
+                        LogLabel.Text = "[SAI QUEST]\nLệch nhiệm vụ! Đang hủy để nhận lại đúng..."
+                        IntentionalAbandon = true
+                        pcall(function() ReplicatedStorage.Remotes.CommF_:InvokeServer("AbandonQuest") end)
+                        task.wait(1)
+                        continue
+                    end
+
                     local bestMonsterModel = getBestTarget(quest.MonsterLv, quest.MonsterRawName)
                     
                     if bestMonsterModel then
-                        LogLabel.Text = "[RADAR]\nPhát hiện " .. cleanMonsterName(bestMonsterModel.Name) .. "! Tấn công..."
+                        LogLabel.Text = "[FARM]\nĐập quái: " .. cleanMonsterName(bestMonsterModel.Name)
                         local monsterPos = bestMonsterModel.HumanoidRootPart.Position
                         if tweenTo(monsterPos) and AutoQuestEnabled then
                             ringPartsEnabled = true
                             startHover()
-                            LogLabel.Text = "[RADAR]\nĐang hút và tiêu diệt mục tiêu!"
                         end
                     else
-                        -- Nếu không thấy quái/Boss, bay tới bãi quái trước để game render thực thể
+                        -- Không tìm thấy quái trong bãi
                         ringPartsEnabled = false
                         stopHover()
                         
-                        local campPos = MonsterPositions[quest.MonsterRawName]
-                        if campPos then
-                            LogLabel.Text = "[RADAR]\nDi chuyển tới bãi để kiểm tra thực thể..."
-                            tweenTo(campPos + Vector3.new(0, 15, 0))
-                            task.wait(1) -- Chờ 1 giây cho game stream quái/Boss vào Workspace
+                        -- Nếu là nhiệm vụ Boss
+                        if quest.IsBoss then
+                            local campPos = MonsterPositions[quest.MonsterRawName]
+                            if campPos then
+                                LogLabel.Text = "[CHECK BOSS]\nRa tận ổ quét Boss..."
+                                tweenTo(campPos + Vector3.new(0, 20, 0))
+                                task.wait(1) -- Tăng thời gian chờ load tí cho chắc chắn
+                                
+                                -- Kiểm tra lại xem Boss thực sự có mặt không
+                                if not getBestTarget(quest.MonsterLv, quest.MonsterRawName) then
+                                    LogLabel.Text = "[BOSS VẮNG]\nKhông thấy Boss! Chuyển cày 5 Q thường..."
+                                    getgenv().FallbackCounter = 5 
+                                    IntentionalAbandon = true
+                                    
+                                    -- HỦY NHIỆM VỤ BOSS NGAY LẬP TỨC
+                                    pcall(function() ReplicatedStorage.Remotes.CommF_:InvokeServer("AbandonQuest") end)
+                                    task.wait(1)
+                                    
+                                    -- ÉP LẤY LẠI DATA NHIỆM VỤ THƯỜNG TRƯỚC KHI VÀO VÒNG LẶP TIẾP THEO
+                                    quest = getFallbackQuest(getPlayerLevel())
+                                    getgenv().CurrentTargetName = quest.MonsterRawName
+                                end
+                            end
                         else
-                            LogLabel.Text = "[RADAR]\nKhông có tọa độ bãi, bay về NPC..."
-                            tweenTo(quest.NPCPosition)
+                            -- Quái thường thì đứng chờ spawn
+                            local campPos = MonsterPositions[quest.MonsterRawName]
+                            if campPos then
+                                tweenTo(campPos + Vector3.new(0, 15, 0))
+                            end
                             task.wait(0.5)
                         end
                     end
-                    
-                    -- BƯỚC 2: SAU KHI ĐÃ ĐẾN NƠI VÀ LOAD XONG, MỚI CHECK XEM CÓ PHẢI HỦY KHÔNG
-                    local currentQuestName = ""
-                    pcall(function()
-                        currentQuestName = LocalPlayer.PlayerGui.Main.Quest.Container.QuestTitle.Text
-                    end)
-                    
-                    local targetQuestClean = string.lower(cleanMonsterName(quest.RealName))
-                    if isFallback or not string.find(string.lower(currentQuestName), targetQuestClean) then
-                        -- Lúc này đã đến bãi Boss mà vẫn xác nhận là không có Boss thật, thì mới hủy!
-                        LogLabel.Text = "[HỆ THỐNG]\nXác nhận Boss chưa hồi sinh! Đang hủy để đổi target..."
-                        pcall(function() ReplicatedStorage.Remotes.CommF_:InvokeServer("AbandonQuest") end)
-                        task.wait(0.5)
-                    end
                 else
-                    -- LƯU Ý: Nếu chưa có quest thì di chuyển tới NPC nhận nhiệm vụ
+                    -- Đi nhận Quest
                     ringPartsEnabled = false
                     stopHover()
-                    LogLabel.Text = "[LA BÀN]\nDi chuyển tới NPC " .. quest.NPCName .. "..."
-                    local targetNpcPos = quest.NPCPosition
-                    if tweenTo(targetNpcPos + Vector3.new(0, 2, 0)) and AutoQuestEnabled then
-                        LogLabel.Text = "[LA BÀN]\nNhận nhiệm vụ: " .. quest.RealName
-                        pcall(function() ReplicatedStorage.Remotes.CommF_:InvokeServer("AbandonQuest") end)
-                        task.wait(0.5)
+                    
+                    local statusText = "[MOVE] Đi nhận nhiệm vụ..."
+                    if getgenv().FallbackCounter > 0 then
+                        statusText = "[FARM THƯỜNG]\nĐang cày chuỗi Q thường (Còn " .. getgenv().FallbackCounter .. ")"
+                    end
+                    LogLabel.Text = statusText
+                    
+                    if tweenTo(quest.NPCPosition) and AutoQuestEnabled then
                         pcall(function() ReplicatedStorage.Remotes.CommF_:InvokeServer("StartQuest", quest.QuestName, quest.QuestIndex) end)
-                        task.wait(1.5)
+                        task.wait(0.8) -- Delay an toàn để máy chủ nhận dữ liệu nhiệm vụ
                     end
                 end
             else
-                LogLabel.Text = "[LỖI]\nData rỗng hoặc không tìm thấy đảo thích hợp!"
+                LogLabel.Text = "[LỖI]\nData lỗi hoặc trống!"
                 ringPartsEnabled = false
                 stopHover()
             end
-            task.wait(1)
+            task.wait(0.2)
         end
         stopNoClip()
         stopHover()
@@ -475,7 +490,7 @@ local function startQuestLoop()
 end
 
 -- ==========================================
--- KẾT NỐI SỰ KIỆN NÚT BẤM (BUTTON EVENTS)
+-- SỰ KIỆN NÚT
 -- ==========================================
 ToggleButton.MouseButton1Click:Connect(function()
     AutoQuestEnabled = not AutoQuestEnabled
@@ -483,18 +498,16 @@ ToggleButton.MouseButton1Click:Connect(function()
     
     if AutoQuestEnabled then
         if #SmartQuestDatabase == 0 then
-            LogLabel.Text = "[LỖI]\nChưa tải được Database! Kích hoạt lại Force Load..."
             LoadCloudData()
         end
-        
         ToggleButton.Text = "AUTO QUEST: ON"
         ToggleButton.BackgroundColor3 = Color3.fromRGB(0, 200, 100)
-        LogLabel.Text = "[HỆ THỐNG]\nRadar V33 Pro đã khởi động."
+        LogLabel.Text = "[HỆ THỐNG]\nKhởi động V36 Pro Max."
         startQuestLoop()
     else
         ToggleButton.Text = "AUTO QUEST: OFF"
         ToggleButton.BackgroundColor3 = Color3.fromRGB(180, 40, 40)
-        LogLabel.Text = "[HỆ THỐNG]\nĐã ngắt hệ thống chiến đấu."
+        LogLabel.Text = "[HỆ THỐNG]\nĐã tắt."
         ringPartsEnabled = false
         stopNoClip()
         stopHover()
