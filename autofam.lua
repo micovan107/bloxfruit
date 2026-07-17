@@ -400,6 +400,9 @@ local function tweenTo(targetPos)
     return true
 end
 
+-- ==========================================
+-- HỆ THỐNG ĐỔI QUEST THÔNG MINH (PATCHED)
+-- ==========================================
 local function startQuestLoop()
     task.spawn(function()
         while AutoQuestEnabled do
@@ -407,45 +410,56 @@ local function startQuestLoop()
             if quest then
                 getgenv().CurrentTargetName = quest.MonsterRawName
                 
+                -- KIỂM TRA ĐỔI QUEST
+                if isQuestActive() then
+                    local currentQuestName = ""
+                    pcall(function()
+                        currentQuestName = LocalPlayer.PlayerGui.Main.Quest.Container.QuestTitle.Text
+                    end)
+                    
+                    if isFallback and not string.find(string.lower(currentQuestName), "commando") then
+                        LogLabel.Text = "[HỆ THỐNG]\nHủy quest Boss chưa hồi sinh để cày quái thường..."
+                        pcall(function() ReplicatedStorage.Remotes.CommF_:InvokeServer("AbandonQuest") end)
+                        task.wait(0.5)
+                    end
+                end
+
                 if isFallback and originalBossQuest then
-                    LogLabel.Text = "[RADAR]\nBoss " .. originalBossQuest.RealName .. " chưa xuất hiện! Chuyển mục tiêu: " .. quest.RealName
+                    LogLabel.Text = "[RADAR]\nBoss " .. originalBossQuest.RealName .. " chưa hồi sinh! Đổi target: " .. quest.RealName
                 else
-                    LogLabel.Text = "[RADAR]\nĐang quét mục tiêu: " .. quest.RealName
+                    LogLabel.Text = "[RADAR]\nĐang khóa vùng quái: " .. quest.RealName
                 end
                 
                 if isQuestActive() then
                     local bestMonsterModel = getBestTarget(quest.MonsterLv, quest.MonsterRawName)
                     if bestMonsterModel then
-                        -- Có quái -> Càn quét
-                        LogLabel.Text = "[RADAR]\nPhát hiện " .. cleanMonsterName(bestMonsterModel.Name) .. "! Khóa mục tiêu..."
+                        LogLabel.Text = "[RADAR]\nPhát hiện " .. cleanMonsterName(bestMonsterModel.Name) .. "! Tấn công..."
                         local monsterPos = bestMonsterModel.HumanoidRootPart.Position
                         if tweenTo(monsterPos) and AutoQuestEnabled then
                             ringPartsEnabled = true
                             startHover()
-                            LogLabel.Text = "[RADAR]\nĐang tiêu diệt dọn dẹp bãi!"
+                            LogLabel.Text = "[RADAR]\nĐang hút và tiêu diệt mục tiêu!"
                         end
                     else
-                        -- Không có quái -> Đợi ở bãi
                         ringPartsEnabled = false
                         stopHover()
                         
                         local campPos = MonsterPositions[quest.MonsterRawName]
                         if campPos then
-                            LogLabel.Text = "[RADAR]\nBãi (".. quest.RealName ..") trống. Đang phục kích chờ hồi sinh..."
-                            tweenTo(campPos + Vector3.new(0, 15, 0)) 
+                            LogLabel.Text = "[RADAR]\nQuái chưa hồi sinh, ra bãi (".. quest.RealName ..") cắm cọc chờ..."
+                            tweenTo(campPos + Vector3.new(0, 15, 0))
                         else
-                            LogLabel.Text = "[RADAR]\nMất dấu tọa độ. Quay về NPC..."
+                            LogLabel.Text = "[RADAR]\nKhông có tọa độ bãi, bay về NPC đợi..."
                             tweenTo(quest.NPCPosition)
                         end
                     end
                 else
-                    -- Đi nhận quest
                     ringPartsEnabled = false
                     stopHover()
                     LogLabel.Text = "[LA BÀN]\nDi chuyển tới NPC " .. quest.NPCName .. "..."
                     local targetNpcPos = quest.NPCPosition
                     if tweenTo(targetNpcPos + Vector3.new(0, 2, 0)) and AutoQuestEnabled then
-                        LogLabel.Text = "[LA BÀN]\nBắt ép nhận nhiệm vụ: " .. quest.RealName
+                        LogLabel.Text = "[LA BÀN]\nNhận nhiệm vụ: " .. quest.RealName
                         pcall(function() ReplicatedStorage.Remotes.CommF_:InvokeServer("AbandonQuest") end)
                         task.wait(0.5)
                         pcall(function() ReplicatedStorage.Remotes.CommF_:InvokeServer("StartQuest", quest.QuestName, quest.QuestIndex) end)
@@ -453,7 +467,7 @@ local function startQuestLoop()
                     end
                 end
             else
-                LogLabel.Text = "[LỖI]\nData rỗng! Kiểm tra lại đường truyền JSON."
+                LogLabel.Text = "[LỖI]\nData rỗng hoặc không tìm thấy đảo thích hợp!"
                 ringPartsEnabled = false
                 stopHover()
             end
