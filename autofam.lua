@@ -64,7 +64,20 @@ local SmartQuestDatabase = {
     [15] = { MinLevel = 210, MaxLevel = 219, NPCName = "Military Detector", NPCPosition = Vector3.new(5131, 4, 383),   MonsterLv = 210, QuestName = "PrisonerQuest",      QuestIndex = 2, MonsterRawName = "Dangerous Prisoner", RealName = "Tù Nhân Nguy Hiểm" },
     [16] = { MinLevel = 220, MaxLevel = 229, NPCName = "Warden",            NPCPosition = Vector3.new(5190, 4, 686),   MonsterLv = 220, QuestName = "ImpelQuest",        QuestIndex = 1, MonsterRawName = "Warden",             RealName = "Chúa Ngục Warden", IsBoss = true, FallbackIndex = 15 },
     [17] = { MinLevel = 230, MaxLevel = 239, NPCName = "Warden",            NPCPosition = Vector3.new(5190, 4, 686),   MonsterLv = 230, QuestName = "ImpelQuest",        QuestIndex = 2, MonsterRawName = "Chief Warden",       RealName = "Trưởng Ngục Chief Warden", IsBoss = true, FallbackIndex = 15 },
-    [18] = { MinLevel = 240, MaxLevel = 249, NPCName = "Chief Warden",      NPCPosition = Vector3.new(5190, 4, 686),   MonsterLv = 240, QuestName = "ImpelQuest",        QuestIndex = 3, MonsterRawName = "Swan",               RealName = "Mingo Giả Đố (Swan)", IsBoss = true, FallbackIndex = 15 }    
+    [18] = { MinLevel = 240, MaxLevel = 249, NPCName = "Chief Warden",      NPCPosition = Vector3.new(5190, 4, 686),   MonsterLv = 240, QuestName = "ImpelQuest",        QuestIndex = 3, MonsterRawName = "Swan",               RealName = "Mingo Giả Đố (Swan)", IsBoss = true, FallbackIndex = 15 },
+    -- COLOSSEUM (ĐẤU TRƯỜNG - LEVEL 250+)
+    [19] = { MinLevel = 250, MaxLevel = 274, NPCName = "Colosseum Quest Giver", NPCPosition = Vector3.new(-1580, 7, -2980), MonsterLv = 250, QuestName = "ColosseumQuest", QuestIndex = 1, MonsterRawName = "Toga Warrior", RealName = "Chiến Sĩ Toga", FallbackIndex = 18 },
+    [20] = { MinLevel = 275, MaxLevel = 299, NPCName = "Colosseum Quest Giver", NPCPosition = Vector3.new(-1580, 7, -2980), MonsterLv = 275, QuestName = "ColosseumQuest", QuestIndex = 2, MonsterRawName = "Gladiator", RealName = "Đấu Sĩ Gladiator", FallbackIndex = 19 },
+
+    -- MAGMA VILLAGE (ĐẢO NÚI LỬA - LEVEL 300+)
+    [21] = { MinLevel = 300, MaxLevel = 324, NPCName = "Military Detector", NPCPosition = Vector3.new(-5315, 12, 8516), MonsterLv = 300, QuestName = "MagmaQuest", QuestIndex = 1, MonsterRawName = "Military Soldier", RealName = "Lính Núi Lửa", FallbackIndex = 20 },
+    [22] = { MinLevel = 325, MaxLevel = 349, NPCName = "Military Detector", NPCPosition = Vector3.new(-5315, 12, 8516), MonsterLv = 325, QuestName = "MagmaQuest", QuestIndex = 2, MonsterRawName = "Military Spy", RealName = "Gián Điệp Núi Lửa", FallbackIndex = 20 },
+    [23] = { MinLevel = 350, MaxLevel = 374, NPCName = "Military Detector", NPCPosition = Vector3.new(-5315, 12, 8516), MonsterLv = 350, QuestName = "MagmaQuest", QuestIndex = 3, MonsterRawName = "Magma Admiral", RealName = "Đô Đốc Magma", IsBoss = true, FallbackIndex = 22 },
+    
+    -- UNDERWATER CITY (ĐẢO NGƯỜI CÁ - LEVEL 375+)
+    [24] = { MinLevel = 375, MaxLevel = 399, NPCName = "Fishman Quest Giver", NPCPosition = Vector3.new(61122, 18, 1567), MonsterLv = 375, QuestName = "FishmanQuest", QuestIndex = 1, MonsterRawName = "Fishman Warrior", RealName = "Chiến Binh Người Cá", FallbackIndex = 23 },
+    [25] = { MinLevel = 400, MaxLevel = 424, NPCName = "Fishman Quest Giver", NPCPosition = Vector3.new(61122, 18, 1567), MonsterLv = 400, QuestName = "FishmanQuest", QuestIndex = 2, MonsterRawName = "Fishman Commando", RealName = "Đặc Nhiệm Người Cá", FallbackIndex = 23 },
+    [26] = { MinLevel = 425, MaxLevel = 449, NPCName = "Fishman Quest Giver", NPCPosition = Vector3.new(61122, 18, 1567), MonsterLv = 425, QuestName = "FishmanQuest", QuestIndex = 3, MonsterRawName = "Fishman Lord", RealName = "Chúa Tể Người Cá", IsBoss = true, FallbackIndex = 25 }
 }
 
 local function getPlayerLevel()
