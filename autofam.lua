@@ -1,4 +1,4 @@
--- [[ COMPASS RINGS V33 PRO - EXPERT PATCHED ]] --
+-- [[ COMPASS RINGS V33 PRO - EXPERT PATCHED (SPEED + TELEPORT) ]] --
 
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
@@ -56,7 +56,6 @@ local MonsterPositions = {}
 local function LoadCloudData()
     local cacheBuster = "?t=" .. tostring(math.random(1, 100000))
 
-    -- 1. Tải Nhiệm vụ
     local success1, rawQuest = pcall(function()
         return game:HttpGet("https://raw.githubusercontent.com/micovan107/bloxfruit/refs/heads/main/nhiemvusea1.json" .. cacheBuster)
     end)
@@ -82,14 +81,9 @@ local function LoadCloudData()
                 })
             end
             print("[HỆ THỐNG] Đã load xong Database Nhiệm Vụ mới nhất!")
-        else
-            warn("[HỆ THỐNG] Lỗi phân tích cú pháp JSON Nhiệm vụ!")
         end
-    else
-        warn("[HỆ THỐNG] Không thể tải Database Nhiệm vụ từ GitHub!")
     end
 
-    -- 2. Tải Vị trí bãi quái
     local success2, rawPos = pcall(function()
         return game:HttpGet("https://raw.githubusercontent.com/micovan107/bloxfruit/refs/heads/main/vitrikhuquaisea1.json" .. cacheBuster)
     end)
@@ -102,11 +96,7 @@ local function LoadCloudData()
                 MonsterPositions[name] = Vector3.new(pos.X, pos.Y, pos.Z)
             end
             print("[HỆ THỐNG] Đã load xong Database Tọa Độ Quái mới nhất!")
-        else
-            warn("[HỆ THỐNG] Lỗi phân tích cú pháp JSON Tọa độ quái!")
         end
-    else
-        warn("[HỆ THỐNG] Không thể tải Database Tọa độ quái từ GitHub!")
     end
 end
 
@@ -115,7 +105,6 @@ LoadCloudData()
 -- ==========================================
 -- LOGIC CỐT LÕI (CORE FUNCTIONS)
 -- ==========================================
-
 local function getPlayerLevel()
     if LocalPlayer:FindFirstChild("Data") and LocalPlayer.Data:FindFirstChild("Level") then return LocalPlayer.Data.Level.Value end
     local leaderstats = LocalPlayer:FindFirstChild("leaderstats")
@@ -141,7 +130,6 @@ local function getQuestByPlayerLevel()
     local myLevel = getPlayerLevel()
     local targetQuest = nil
 
-    -- Tìm quest phù hợp với level
     for _, quest in ipairs(SmartQuestDatabase) do
         if myLevel >= quest.MinLevel and myLevel <= quest.MaxLevel then
             targetQuest = quest
@@ -149,11 +137,8 @@ local function getQuestByPlayerLevel()
         end
     end
 
-    if not targetQuest then 
-        return SmartQuestDatabase[#SmartQuestDatabase], false, nil 
-    end
+    if not targetQuest then return SmartQuestDatabase[#SmartQuestDatabase], false, nil end
 
-    -- Xử lý an toàn cho Boss (Tìm theo Index thay vì vị trí mảng để tránh lỗi JSON)
     if targetQuest.IsBoss and not isMonsterSpawned(targetQuest.MonsterRawName) then
         if targetQuest.FallbackIndex then
             for _, fallbackQ in ipairs(SmartQuestDatabase) do
@@ -191,7 +176,6 @@ end
 -- ==========================================
 -- GIAO DIỆN NGƯỜI DÙNG (GUI)
 -- ==========================================
-
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "Lil0darkie6RingsGUI"
 ScreenGui.ResetOnSpawn = false
@@ -295,7 +279,6 @@ Watermark.Parent = MainFrame
 -- ==========================================
 -- LOGIC HÚT QUÁI (MAGNET & HOVER)
 -- ==========================================
-
 local radius = 50
 local height = 100
 local rotationSpeed = 0.5
@@ -378,15 +361,26 @@ local function stopHover()
     if HoverConnection then HoverConnection:Disconnect() HoverConnection = nil end
 end
 
+-- ==========================================
+-- HỆ THỐNG DI CHUYỂN SIÊU TỐC & DỊCH CHUYỂN
+-- ==========================================
 local function tweenTo(targetPos)
     local char = LocalPlayer.Character
     if not char or not char:FindFirstChild("HumanoidRootPart") then return false end
     local hrp = char.HumanoidRootPart
     local dist = (hrp.Position - targetPos).Magnitude
     
-    if dist > 3 then
+    -- Dịch chuyển tức thời nếu khoảng cách gần (< 300 studs)
+    if dist <= 300 and dist > 5 then
+        hrp.CFrame = CFrame.new(targetPos)
+        task.wait(0.1)
+        return true
+    end
+
+    -- Nếu xa thì Tween với tốc độ bàn thờ (450)
+    if dist > 300 then
         startNoClip()
-        local speed = 320 
+        local speed = 450 -- Đã buff tốc độ
         local tween = TweenService:Create(hrp, TweenInfo.new(dist / speed, Enum.EasingStyle.Linear), {CFrame = CFrame.new(targetPos)})
         tween:Play()
         while tween.PlaybackState == Enum.PlaybackState.Playing do
@@ -394,14 +388,15 @@ local function tweenTo(targetPos)
             task.wait(0.1)
         end
     end
+    
     stopNoClip()
     if char:FindFirstChild("HumanoidRootPart") then char.HumanoidRootPart.Velocity = Vector3.new(0, 0, 0) end
-    task.wait(0.5)
+    task.wait(0.2)
     return true
 end
 
 -- ==========================================
--- HỆ THỐNG ĐỔI QUEST THÔNG MINH (PATCHED)
+-- HỆ THỐNG ĐỔI QUEST THÔNG MINH (PATCHED FIX)
 -- ==========================================
 local function startQuestLoop()
     task.spawn(function()
@@ -410,15 +405,15 @@ local function startQuestLoop()
             if quest then
                 getgenv().CurrentTargetName = quest.MonsterRawName
                 
-                -- KIỂM TRA ĐỔI QUEST
                 if isQuestActive() then
                     local currentQuestName = ""
                     pcall(function()
                         currentQuestName = LocalPlayer.PlayerGui.Main.Quest.Container.QuestTitle.Text
                     end)
                     
-                    if isFallback and not string.find(string.lower(currentQuestName), "commando") then
-                        LogLabel.Text = "[HỆ THỐNG]\nHủy quest Boss chưa hồi sinh để cày quái thường..."
+                    local targetQuestClean = string.lower(cleanMonsterName(quest.RealName))
+                    if isFallback or not string.find(string.lower(currentQuestName), targetQuestClean) then
+                        LogLabel.Text = "[HỆ THỐNG]\nQuest không khớp hoặc Boss chưa hồi sinh! Đang hủy..."
                         pcall(function() ReplicatedStorage.Remotes.CommF_:InvokeServer("AbandonQuest") end)
                         task.wait(0.5)
                     end
@@ -471,7 +466,7 @@ local function startQuestLoop()
                 ringPartsEnabled = false
                 stopHover()
             end
-            task.wait(2)
+            task.wait(1.5)
         end
         stopNoClip()
         stopHover()
@@ -482,7 +477,6 @@ end
 -- ==========================================
 -- KẾT NỐI SỰ KIỆN NÚT BẤM (BUTTON EVENTS)
 -- ==========================================
-
 ToggleButton.MouseButton1Click:Connect(function()
     AutoQuestEnabled = not AutoQuestEnabled
     pcall(function() playSound("12221967") end)
