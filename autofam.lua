@@ -59,7 +59,12 @@ local SmartQuestDatabase = {
     [11] = { MinLevel = 120, MaxLevel = 149, NPCName = "Marine",          NPCPosition = Vector3.new(-5036, 23, 4313),  MonsterLv = 120, QuestName = "FortressQuest",         QuestIndex = 1, MonsterRawName = "Chief Petty Officer", RealName = "Hạ Sĩ Quan" },
     [12] = { MinLevel = 150, MaxLevel = 174, NPCName = "Sky Adventurer",  NPCPosition = Vector3.new(-4839, 718, -2622),MonsterLv = 150, QuestName = "SkyQuest",              QuestIndex = 1, MonsterRawName = "Sky Bandit",      RealName = "Cướp Bầu Trời" },
     [13] = { MinLevel = 175, MaxLevel = 189, NPCName = "Sky Adventurer",  NPCPosition = Vector3.new(-4839, 718, -2622),MonsterLv = 175, QuestName = "SkyQuest",              QuestIndex = 2, MonsterRawName = "Dark Master",     RealName = "Chúa Tể Bóng Tối" },
-    [14] = { MinLevel = 190, MaxLevel = 249, NPCName = "Good Guard",      NPCPosition = Vector3.new(5338, 2, 404),     MonsterLv = 190, QuestName = "PrisonerQuest",         QuestIndex = 1, MonsterRawName = "Prisoner",        RealName = "Tù Nhân" }
+    -- Đảo Nhà Tù (Prison) chia làm các mốc cụ thể:
+    [14] = { MinLevel = 190, MaxLevel = 209, NPCName = "Military Detector", NPCPosition = Vector3.new(5131, 4, 383),   MonsterLv = 190, QuestName = "PrisonerQuest",      QuestIndex = 1, MonsterRawName = "Prisoner",           RealName = "Tù Nhân" },
+    [15] = { MinLevel = 210, MaxLevel = 219, NPCName = "Military Detector", NPCPosition = Vector3.new(5131, 4, 383),   MonsterLv = 210, QuestName = "PrisonerQuest",      QuestIndex = 2, MonsterRawName = "Dangerous Prisoner", RealName = "Tù Nhân Nguy Hiểm" },
+    [16] = { MinLevel = 220, MaxLevel = 229, NPCName = "Warden",            NPCPosition = Vector3.new(4862, 16, 532),   MonsterLv = 220, QuestName = "WardenQuest",        QuestIndex = 1, MonsterRawName = "Warden",             RealName = "Chúa Ngục Warden", IsBoss = true, FallbackIndex = 15 },
+    [17] = { MinLevel = 230, MaxLevel = 239, NPCName = "Warden",            NPCPosition = Vector3.new(4862, 16, 532),   MonsterLv = 230, QuestName = "WardenQuest",        QuestIndex = 2, MonsterRawName = "Chief Warden",       RealName = "Trưởng Ngục Chief Warden", IsBoss = true, FallbackIndex = 15 },
+    [18] = { MinLevel = 240, MaxLevel = 249, NPCName = "Chief Warden",      NPCPosition = Vector3.new(4862, 16, 532),   MonsterLv = 240, QuestName = "WardenQuest",        QuestIndex = 3, MonsterRawName = "Swan",               RealName = "Mingo Giả Đố (Swan)", IsBoss = true, FallbackIndex = 15 }    
 }
 
 local function getPlayerLevel()
