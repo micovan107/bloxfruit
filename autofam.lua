@@ -1,4 +1,4 @@
--- [[ COMPASS RINGS V33 PRO - EXPERT PATCHED (SPEED + TELEPORT) ]] --
+-- [[ COMPASS RINGS V33 PRO - EXPERT PATCHED (SPEED + TELEPORT + BOSS FIX) ]] --
 
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
@@ -396,7 +396,7 @@ local function tweenTo(targetPos)
 end
 
 -- ==========================================
--- HỆ THỐNG ĐỔI QUEST THÔNG MINH (PATCHED FIX)
+-- HỆ THỐNG ĐỔI QUEST THÔNG MINH - FIX LỖI TỰ HỦY
 -- ==========================================
 local function startQuestLoop()
     task.spawn(function()
@@ -405,28 +405,10 @@ local function startQuestLoop()
             if quest then
                 getgenv().CurrentTargetName = quest.MonsterRawName
                 
-                if isQuestActive() then
-                    local currentQuestName = ""
-                    pcall(function()
-                        currentQuestName = LocalPlayer.PlayerGui.Main.Quest.Container.QuestTitle.Text
-                    end)
-                    
-                    local targetQuestClean = string.lower(cleanMonsterName(quest.RealName))
-                    if isFallback or not string.find(string.lower(currentQuestName), targetQuestClean) then
-                        LogLabel.Text = "[HỆ THỐNG]\nQuest không khớp hoặc Boss chưa hồi sinh! Đang hủy..."
-                        pcall(function() ReplicatedStorage.Remotes.CommF_:InvokeServer("AbandonQuest") end)
-                        task.wait(0.5)
-                    end
-                end
-
-                if isFallback and originalBossQuest then
-                    LogLabel.Text = "[RADAR]\nBoss " .. originalBossQuest.RealName .. " chưa hồi sinh! Đổi target: " .. quest.RealName
-                else
-                    LogLabel.Text = "[RADAR]\nĐang khóa vùng quái: " .. quest.RealName
-                end
-                
+                -- BƯỚC 1: KIỂM TRA VÀ DI CHUYỂN TRƯỚC KHI XỬ LÝ QUEST
                 if isQuestActive() then
                     local bestMonsterModel = getBestTarget(quest.MonsterLv, quest.MonsterRawName)
+                    
                     if bestMonsterModel then
                         LogLabel.Text = "[RADAR]\nPhát hiện " .. cleanMonsterName(bestMonsterModel.Name) .. "! Tấn công..."
                         local monsterPos = bestMonsterModel.HumanoidRootPart.Position
@@ -436,19 +418,37 @@ local function startQuestLoop()
                             LogLabel.Text = "[RADAR]\nĐang hút và tiêu diệt mục tiêu!"
                         end
                     else
+                        -- Nếu không thấy quái/Boss, bay tới bãi quái trước để game render thực thể
                         ringPartsEnabled = false
                         stopHover()
                         
                         local campPos = MonsterPositions[quest.MonsterRawName]
                         if campPos then
-                            LogLabel.Text = "[RADAR]\nQuái chưa hồi sinh, ra bãi (".. quest.RealName ..") cắm cọc chờ..."
+                            LogLabel.Text = "[RADAR]\nDi chuyển tới bãi để kiểm tra thực thể..."
                             tweenTo(campPos + Vector3.new(0, 15, 0))
+                            task.wait(1) -- Chờ 1 giây cho game stream quái/Boss vào Workspace
                         else
-                            LogLabel.Text = "[RADAR]\nKhông có tọa độ bãi, bay về NPC đợi..."
+                            LogLabel.Text = "[RADAR]\nKhông có tọa độ bãi, bay về NPC..."
                             tweenTo(quest.NPCPosition)
+                            task.wait(0.5)
                         end
                     end
+                    
+                    -- BƯỚC 2: SAU KHI ĐÃ ĐẾN NƠI VÀ LOAD XONG, MỚI CHECK XEM CÓ PHẢI HỦY KHÔNG
+                    local currentQuestName = ""
+                    pcall(function()
+                        currentQuestName = LocalPlayer.PlayerGui.Main.Quest.Container.QuestTitle.Text
+                    end)
+                    
+                    local targetQuestClean = string.lower(cleanMonsterName(quest.RealName))
+                    if isFallback or not string.find(string.lower(currentQuestName), targetQuestClean) then
+                        -- Lúc này đã đến bãi Boss mà vẫn xác nhận là không có Boss thật, thì mới hủy!
+                        LogLabel.Text = "[HỆ THỐNG]\nXác nhận Boss chưa hồi sinh! Đang hủy để đổi target..."
+                        pcall(function() ReplicatedStorage.Remotes.CommF_:InvokeServer("AbandonQuest") end)
+                        task.wait(0.5)
+                    end
                 else
+                    -- LƯU Ý: Nếu chưa có quest thì di chuyển tới NPC nhận nhiệm vụ
                     ringPartsEnabled = false
                     stopHover()
                     LogLabel.Text = "[LA BÀN]\nDi chuyển tới NPC " .. quest.NPCName .. "..."
@@ -466,7 +466,7 @@ local function startQuestLoop()
                 ringPartsEnabled = false
                 stopHover()
             end
-            task.wait(1.5)
+            task.wait(1)
         end
         stopNoClip()
         stopHover()
