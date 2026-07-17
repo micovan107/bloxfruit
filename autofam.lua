@@ -3,6 +3,7 @@ local TweenService = game:GetService("TweenService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 local SoundService = game:GetService("SoundService")
+local HttpService = game:GetService("HttpService")
 local LocalPlayer = Players.LocalPlayer
 local Workspace = game:GetService("Workspace")
 
@@ -44,41 +45,57 @@ task.spawn(function()
     end)
 end)
 
--- Đã Patch lại logic Database, xóa mớ rác cũ đi
-local SmartQuestDatabase = {
-    [1] = { MinLevel = 1,   MaxLevel = 9,   NPCName = "Bandit Recruiter", NPCPosition = Vector3.new(1059, 16, 1549),  MonsterLv = 5,   QuestName = "BanditQuest1",         QuestIndex = 1, MonsterRawName = "Bandit",         RealName = "Cướp" },
-    [2] = { MinLevel = 10,  MaxLevel = 14,  NPCName = "Monkey Business",  NPCPosition = Vector3.new(-1598, 37, 153),   MonsterLv = 14,  QuestName = "JungleQuest",           QuestIndex = 1, MonsterRawName = "Monkey",         RealName = "Khỉ" },
-    [3] = { MinLevel = 15,  MaxLevel = 29,  NPCName = "Monkey Business",  NPCPosition = Vector3.new(-1598, 37, 153),   MonsterLv = 20,  QuestName = "JungleQuest",           QuestIndex = 2, MonsterRawName = "Gorilla",        RealName = "Khỉ Đột" },
-    [4] = { MinLevel = 30,  MaxLevel = 39,  NPCName = "Pirate Adventurer",NPCPosition = Vector3.new(-1146, 22, 3811),  MonsterLv = 35,  QuestName = "BuggyQuest1",           QuestIndex = 1, MonsterRawName = "Pirate",         RealName = "Hải Tặc" },
-    [5] = { MinLevel = 40,  MaxLevel = 49,  NPCName = "Pirate Adventurer",NPCPosition = Vector3.new(-1146, 22, 3811),  MonsterLv = 45,  QuestName = "BuggyQuest1",           QuestIndex = 2, MonsterRawName = "Brute",          RealName = "Brute (Lính Cát)" },
-    [6] = { MinLevel = 50,  MaxLevel = 59,  NPCName = "Pirate Adventurer",NPCPosition = Vector3.new(-1146, 22, 3811),  MonsterLv = 55,  QuestName = "BuggyQuest1",           QuestIndex = 3, MonsterRawName = "Chef",           RealName = "Đầu Bếp (Boss Chef)", IsBoss = true, FallbackIndex = 5 },
-    [7] = { MinLevel = 60,  MaxLevel = 74,  NPCName = "Desert Adventurer",NPCPosition = Vector3.new(1094, 6, 4195),    MonsterLv = 60,  QuestName = "DesertQuest",           QuestIndex = 1, MonsterRawName = "Desert Bandit",   RealName = "Cướp Sa Mạc" },
-    [8] = { MinLevel = 75,  MaxLevel = 89,  NPCName = "Desert Adventurer",NPCPosition = Vector3.new(1094, 6, 4195),    MonsterLv = 75,  QuestName = "DesertQuest",           QuestIndex = 2, MonsterRawName = "Desert Officer",  RealName = "Sĩ Quan Sa Mạc" },
-    [9] = { MinLevel = 90,  MaxLevel = 99,  NPCName = "Snow Adventurer",  NPCPosition = Vector3.new(1386, 87, -1298),  MonsterLv = 90,  QuestName = "SnowQuest",             QuestIndex = 1, MonsterRawName = "Snow Bandit",     RealName = "Cướp Tuyết" },
-    [10] = { MinLevel = 100, MaxLevel = 119, NPCName = "Snow Adventurer", NPCPosition = Vector3.new(1386, 87, -1298),  MonsterLv = 100, QuestName = "SnowQuest",             QuestIndex = 2, MonsterRawName = "Snowman",         RealName = "Người Tuyết" },
-    [11] = { MinLevel = 120, MaxLevel = 149, NPCName = "Marine",          NPCPosition = Vector3.new(-5036, 23, 4313),  MonsterLv = 120, QuestName = "FortressQuest",         QuestIndex = 1, MonsterRawName = "Chief Petty Officer", RealName = "Hạ Sĩ Quan" },
-    [12] = { MinLevel = 150, MaxLevel = 174, NPCName = "Sky Adventurer",  NPCPosition = Vector3.new(-4839, 718, -2622),MonsterLv = 150, QuestName = "SkyQuest",              QuestIndex = 1, MonsterRawName = "Sky Bandit",      RealName = "Cướp Bầu Trời" },
-    [13] = { MinLevel = 175, MaxLevel = 189, NPCName = "Sky Adventurer",  NPCPosition = Vector3.new(-4839, 718, -2622),MonsterLv = 175, QuestName = "SkyQuest",              QuestIndex = 2, MonsterRawName = "Dark Master",     RealName = "Chúa Tể Bóng Tối" },
-    -- Đảo Nhà Tù (Prison) chia làm các mốc cụ thể:
-    [14] = { MinLevel = 190, MaxLevel = 209, NPCName = "Military Detector", NPCPosition = Vector3.new(5131, 4, 383),   MonsterLv = 190, QuestName = "PrisonerQuest",      QuestIndex = 1, MonsterRawName = "Prisoner",           RealName = "Tù Nhân" },
-    [15] = { MinLevel = 210, MaxLevel = 219, NPCName = "Military Detector", NPCPosition = Vector3.new(5131, 4, 383),   MonsterLv = 210, QuestName = "PrisonerQuest",      QuestIndex = 2, MonsterRawName = "Dangerous Prisoner", RealName = "Tù Nhân Nguy Hiểm" },
-    [16] = { MinLevel = 220, MaxLevel = 229, NPCName = "Warden",            NPCPosition = Vector3.new(5190, 4, 686),   MonsterLv = 220, QuestName = "ImpelQuest",        QuestIndex = 1, MonsterRawName = "Warden",             RealName = "Chúa Ngục Warden", IsBoss = true, FallbackIndex = 15 },
-    [17] = { MinLevel = 230, MaxLevel = 239, NPCName = "Warden",            NPCPosition = Vector3.new(5190, 4, 686),   MonsterLv = 230, QuestName = "ImpelQuest",        QuestIndex = 2, MonsterRawName = "Chief Warden",       RealName = "Trưởng Ngục Chief Warden", IsBoss = true, FallbackIndex = 15 },
-    [18] = { MinLevel = 240, MaxLevel = 249, NPCName = "Chief Warden",      NPCPosition = Vector3.new(5190, 4, 686),   MonsterLv = 240, QuestName = "ImpelQuest",        QuestIndex = 3, MonsterRawName = "Swan",               RealName = "Mingo Giả Đố (Swan)", IsBoss = true, FallbackIndex = 15 },
-    -- COLOSSEUM (ĐẤU TRƯỜNG - LEVEL 250+)
-    [19] = { MinLevel = 250, MaxLevel = 274, NPCName = "Colosseum Quest Giver", NPCPosition = Vector3.new(-1580, 7, -2980), MonsterLv = 250, QuestName = "ColosseumQuest", QuestIndex = 1, MonsterRawName = "Toga Warrior", RealName = "Chiến Sĩ Toga" },
-    [20] = { MinLevel = 275, MaxLevel = 299, NPCName = "Colosseum Quest Giver", NPCPosition = Vector3.new(-1580, 7, -2980), MonsterLv = 275, QuestName = "ColosseumQuest", QuestIndex = 2, MonsterRawName = "Gladiator", RealName = "Đấu Sĩ Gladiator", FallbackIndex = 19 },
+-- ==========================================
+-- [PATCHED DATABASE] - TẢI DATA TỪ GITHUB
+-- ==========================================
+local SmartQuestDatabase = {}
+local MonsterPositions = {}
 
-    -- MAGMA VILLAGE (ĐẢO NÚI LỬA - LEVEL 300+)
-    [21] = { MinLevel = 300, MaxLevel = 324, NPCName = "Military Detector", NPCPosition = Vector3.new(-5315, 12, 8516), MonsterLv = 300, QuestName = "MagmaQuest", QuestIndex = 1, MonsterRawName = "Military Soldier", RealName = "Lính Núi Lửa", FallbackIndex = 20 },
-    [22] = { MinLevel = 325, MaxLevel = 349, NPCName = "Military Detector", NPCPosition = Vector3.new(-5315, 12, 8516), MonsterLv = 325, QuestName = "MagmaQuest", QuestIndex = 2, MonsterRawName = "Military Spy", RealName = "Gián Điệp Núi Lửa", FallbackIndex = 20 },
-    [23] = { MinLevel = 350, MaxLevel = 374, NPCName = "Military Detector", NPCPosition = Vector3.new(-5315, 12, 8516), MonsterLv = 350, QuestName = "MagmaQuest", QuestIndex = 3, MonsterRawName = "Magma Admiral", RealName = "Đô Đốc Magma", IsBoss = true, FallbackIndex = 22 },
-    
-    -- UNDERWATER CITY (ĐẢO NGƯỜI CÁ - LEVEL 375+)
-    [24] = { MinLevel = 375, MaxLevel = 399, NPCName = "Fishman Quest Giver", NPCPosition = Vector3.new(61122, 18, 1567), MonsterLv = 375, QuestName = "FishmanQuest", QuestIndex = 1, MonsterRawName = "Fishman Warrior", RealName = "Chiến Binh Người Cá", FallbackIndex = 23 },
-    [25] = { MinLevel = 400, MaxLevel = 424, NPCName = "Fishman Quest Giver", NPCPosition = Vector3.new(61122, 18, 1567), MonsterLv = 400, QuestName = "FishmanQuest", QuestIndex = 2, MonsterRawName = "Fishman Commando", RealName = "Đặc Nhiệm Người Cá", FallbackIndex = 23 },
-    [26] = { MinLevel = 425, MaxLevel = 449, NPCName = "Fishman Quest Giver", NPCPosition = Vector3.new(61122, 18, 1567), MonsterLv = 425, QuestName = "FishmanQuest", QuestIndex = 3, MonsterRawName = "Fishman Lord", RealName = "Chúa Tể Người Cá", IsBoss = true, FallbackIndex = 25 }
-}
+local function LoadCloudData()
+    -- Tải Nhiệm vụ
+    local success1, rawQuest = pcall(function()
+        return game:HttpGet("https://raw.githubusercontent.com/micovan107/bloxfruit/refs/heads/main/nhiemvusea1.json")
+    end)
+    if success1 and rawQuest then
+        local ok, data = pcall(function() return HttpService:JSONDecode(rawQuest) end)
+        if ok then
+            for _, item in ipairs(data) do
+                table.insert(SmartQuestDatabase, {
+                    MinLevel = item.MinLevel,
+                    MaxLevel = item.MaxLevel,
+                    NPCName = item.NPCName,
+                    NPCPosition = Vector3.new(item.NPCPos.X, item.NPCPos.Y, item.NPCPos.Z),
+                    MonsterLv = item.MonsterLv,
+                    QuestName = item.QuestName,
+                    QuestIndex = item.QuestIndex,
+                    MonsterRawName = item.MonsterRawName,
+                    RealName = item.RealName,
+                    IsBoss = item.IsBoss or false,
+                    FallbackIndex = item.FallbackIndex
+                })
+            end
+            print("[HỆ THỐNG] Đã load xong Database Nhiệm Vụ!")
+        end
+    end
+
+    -- Tải Vị trí bãi quái
+    local success2, rawPos = pcall(function()
+        return game:HttpGet("https://raw.githubusercontent.com/micovan107/bloxfruit/refs/heads/main/vitrikhuquaisea1.json")
+    end)
+    if success2 and rawPos then
+        local ok, data = pcall(function() return HttpService:JSONDecode(rawPos) end)
+        if ok then
+            for name, pos in pairs(data) do
+                MonsterPositions[name] = Vector3.new(pos.X, pos.Y, pos.Z)
+            end
+            print("[HỆ THỐNG] Đã load xong Database Tọa Độ Quái!")
+        end
+    end
+end
+
+-- Chạy hàm tải data ngay lập tức
+LoadCloudData()
+-- ==========================================
 
 local function getPlayerLevel()
     if LocalPlayer:FindFirstChild("Data") and LocalPlayer.Data:FindFirstChild("Level") then return LocalPlayer.Data.Level.Value end
@@ -100,6 +117,7 @@ local function isMonsterSpawned(targetLv, rawName)
 end
 
 local function getQuestByPlayerLevel()
+    if #SmartQuestDatabase == 0 then return nil, false, nil end -- Đề phòng mạng lag chưa get được data
     local myLevel = getPlayerLevel()
     for index, quest in ipairs(SmartQuestDatabase) do
         if myLevel >= quest.MinLevel and myLevel <= quest.MaxLevel then
@@ -127,19 +145,6 @@ local function getBestTarget(targetLv, rawName)
         if obj:IsA("Model") and obj:FindFirstChild("HumanoidRootPart") and obj:FindFirstChild("Humanoid") and obj.Humanoid.Health > 0 then
             if string.find(obj.Name, targetPattern) or string.find(obj.Humanoid.DisplayName or "", targetPattern) or (rawName and string.find(obj.Name, rawName)) then
                 return obj
-            end
-        end
-    end
-    return nil
-end
-
-local function findNPCInWorld(npcName)
-    local npcsFolder = Workspace:FindFirstChild("NPCs")
-    local foldersToSearch = npcsFolder and {npcsFolder} or {Workspace}
-    for _, folder in ipairs(foldersToSearch) do
-        for _, obj in ipairs(folder:GetChildren()) do
-            if obj:IsA("Model") and obj.Name == npcName and obj:FindFirstChild("HumanoidRootPart") then
-                return obj.HumanoidRootPart.Position
             end
         end
     end
@@ -364,6 +369,7 @@ local function startQuestLoop()
                 if isQuestActive() then
                     local bestMonsterModel = getBestTarget(quest.MonsterLv, quest.MonsterRawName)
                     if bestMonsterModel then
+                        -- Có quái -> Lao vào phang
                         LogLabel.Text = "[RADAR]\nPhát hiện " .. cleanMonsterName(bestMonsterModel.Name) .. "! Tấn công..."
                         local monsterPos = bestMonsterModel.HumanoidRootPart.Position
                         if tweenTo(monsterPos) and AutoQuestEnabled then
@@ -372,16 +378,24 @@ local function startQuestLoop()
                             LogLabel.Text = "[RADAR]\nĐang hút và tiêu diệt mục tiêu!"
                         end
                     else
-                        LogLabel.Text = "[RADAR]\nQuái chưa hồi sinh, đang bay quanh đảo ép tải map..."
+                        -- [PATCHED RADAR] - Logic bay ra bãi chờ quái nếu chưa hồi sinh
                         ringPartsEnabled = false
                         stopHover()
-                        tweenTo(quest.NPCPosition)
+                        
+                        local campPos = MonsterPositions[quest.MonsterRawName]
+                        if campPos then
+                            LogLabel.Text = "[RADAR]\nQuái chưa hồi sinh, ra bãi (".. quest.RealName ..") cắm cọc chờ..."
+                            tweenTo(campPos + Vector3.new(0, 15, 0)) -- Bay cao lên 15 stud so với mặt đất bãi quái cho an toàn
+                        else
+                            LogLabel.Text = "[RADAR]\nKhông có tọa độ bãi, bay về NPC đợi..."
+                            tweenTo(quest.NPCPosition)
+                        end
                     end
                 else
                     ringPartsEnabled = false
                     stopHover()
                     LogLabel.Text = "[LA BÀN]\nDi chuyển tới NPC " .. quest.NPCName .. "..."
-                    local targetNpcPos = realNpcPos or quest.NPCPosition
+                    local targetNpcPos = quest.NPCPosition
                     if tweenTo(targetNpcPos + Vector3.new(0, 2, 0)) and AutoQuestEnabled then
                         LogLabel.Text = "[LA BÀN]\nNhận nhiệm vụ: " .. quest.RealName
                         pcall(function() ReplicatedStorage.Remotes.CommF_:InvokeServer("AbandonQuest") end)
@@ -391,7 +405,7 @@ local function startQuestLoop()
                     end
                 end
             else
-                LogLabel.Text = "[LỖI]\nKhông tìm thấy cấu hình đảo thích hợp!"
+                LogLabel.Text = "[LỖI]\nData rỗng hoặc không tìm thấy đảo thích hợp!"
                 ringPartsEnabled = false
                 stopHover()
             end
@@ -407,9 +421,14 @@ ToggleButton.MouseButton1Click:Connect(function()
     AutoQuestEnabled = not AutoQuestEnabled
     pcall(function() playSound("12221967") end)
     if AutoQuestEnabled then
+        if #SmartQuestDatabase == 0 then
+            LogLabel.Text = "[LỖI]\nChưa tải được Database từ Github! Đang thử lại..."
+            LoadCloudData()
+        end
+        
         ToggleButton.Text = "AUTO QUEST: ON"
         ToggleButton.BackgroundColor3 = Color3.fromRGB(0, 200, 100)
-        LogLabel.Text = "[HỆ THỐNG]\nKhởi động Radar V32 thành công!"
+        LogLabel.Text = "[HỆ THỐNG]\nKhởi động Radar V32 (Cloud Version)!"
         startQuestLoop()
     else
         ToggleButton.Text = "AUTO QUEST: OFF"
