@@ -46,19 +46,23 @@ task.spawn(function()
 end)
 
 -- ==========================================
--- [PATCHED DATABASE] - TẢI DATA TỪ GITHUB
+-- [PATCHED DATABASE] - TẢI DATA TỪ GITHUB (ANTI-CACHE)
 -- ==========================================
 local SmartQuestDatabase = {}
 local MonsterPositions = {}
 
 local function LoadCloudData()
-    -- Tải Nhiệm vụ
+    -- Tạo mã tránh cache ngẫu nhiên để ép tải dữ liệu mới nhất
+    local cacheBuster = "?t=" .. tostring(math.random(1, 100000))
+
+    -- 1. Tải Nhiệm vụ
     local success1, rawQuest = pcall(function()
-        return game:HttpGet("https://raw.githubusercontent.com/micovan107/bloxfruit/refs/heads/main/nhiemvusea1.json")
+        return game:HttpGet("https://raw.githubusercontent.com/micovan107/bloxfruit/refs/heads/main/nhiemvusea1.json" .. cacheBuster)
     end)
     if success1 and rawQuest then
         local ok, data = pcall(function() return HttpService:JSONDecode(rawQuest) end)
         if ok then
+            table.clear(SmartQuestDatabase)
             for _, item in ipairs(data) do
                 table.insert(SmartQuestDatabase, {
                     MinLevel = item.MinLevel,
@@ -74,22 +78,31 @@ local function LoadCloudData()
                     FallbackIndex = item.FallbackIndex
                 })
             end
-            print("[HỆ THỐNG] Đã load xong Database Nhiệm Vụ!")
+            print("[HỆ THỐNG] Đã load xong Database Nhiệm Vụ mới nhất!")
+        else
+            warn("[HỆ THỐNG] Lỗi phân tích cú pháp JSON Nhiệm vụ!")
         end
+    else
+        warn("[HỆ THỐNG] Không thể tải Database Nhiệm vụ từ GitHub!")
     end
 
-    -- Tải Vị trí bãi quái
+    -- 2. Tải Vị trí bãi quái
     local success2, rawPos = pcall(function()
-        return game:HttpGet("https://raw.githubusercontent.com/micovan107/bloxfruit/refs/heads/main/vitrikhuquaisea1.json")
+        return game:HttpGet("https://raw.githubusercontent.com/micovan107/bloxfruit/refs/heads/main/vitrikhuquaisea1.json" .. cacheBuster)
     end)
     if success2 and rawPos then
         local ok, data = pcall(function() return HttpService:JSONDecode(rawPos) end)
         if ok then
+            table.clear(MonsterPositions)
             for name, pos in pairs(data) do
                 MonsterPositions[name] = Vector3.new(pos.X, pos.Y, pos.Z)
             end
-            print("[HỆ THỐNG] Đã load xong Database Tọa Độ Quái!")
+            print("[HỆ THỐNG] Đã load xong Database Tọa Độ Quái mới nhất!")
+        else
+            warn("[HỆ THỐNG] Lỗi phân tích cú pháp JSON Tọa độ quái!")
         end
+    else
+        warn("[HỆ THỐNG] Không thể tải Database Tọa độ quái từ GitHub!")
     end
 end
 
@@ -110,14 +123,14 @@ local function isMonsterSpawned(targetLv, rawName)
     for _, obj in ipairs(enemiesFolder:GetChildren()) do
         if obj:IsA("Model") and obj:FindFirstChild("HumanoidRootPart") and obj:FindFirstChild("Humanoid") and obj.Humanoid.Health > 0 then
             local modelName, dName = obj.Name, obj.Humanoid.DisplayName or ""
-            if string.find(modelName, targetPattern) or string.find(dName, targetPattern) or (rawName and string.find(modelName, rawName)) then return true end
+            if string.find(modelName, targetPattern) or string.find(dName, targetPattern) or (rawName and string.find(string.lower(modelName), string.lower(rawName))) then return true end
         end
     end
     return false
 end
 
 local function getQuestByPlayerLevel()
-    if #SmartQuestDatabase == 0 then return nil, false, nil end -- Đề phòng mạng lag chưa get được data
+    if #SmartQuestDatabase == 0 then return nil, false, nil end
     local myLevel = getPlayerLevel()
     for index, quest in ipairs(SmartQuestDatabase) do
         if myLevel >= quest.MinLevel and myLevel <= quest.MaxLevel then
@@ -143,7 +156,7 @@ local function getBestTarget(targetLv, rawName)
     local enemiesFolder, targetPattern = Workspace:FindFirstChild("Enemies") or Workspace, "%[Lv%.%s*" .. tostring(targetLv) .. "%]"
     for _, obj in ipairs(enemiesFolder:GetChildren()) do
         if obj:IsA("Model") and obj:FindFirstChild("HumanoidRootPart") and obj:FindFirstChild("Humanoid") and obj.Humanoid.Health > 0 then
-            if string.find(obj.Name, targetPattern) or string.find(obj.Humanoid.DisplayName or "", targetPattern) or (rawName and string.find(obj.Name, rawName)) then
+            if string.find(obj.Name, targetPattern) or string.find(obj.Humanoid.DisplayName or "", targetPattern) or (rawName and string.find(string.lower(obj.Name), string.lower(rawName))) then
                 return obj
             end
         end
