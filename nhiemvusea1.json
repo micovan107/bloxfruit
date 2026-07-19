@@ -29,3 +29,4 @@
 { "Index": 28, "MinLevel": 475, "MaxLevel": 524, "NPCName": "Mole", "NPCPos": {"X": -4722, "Y": 844, "Z": -1950}, "MonsterLv": 475, "QuestName": "SkyExpQuest", "QuestIndex": 2, "MonsterRawName": "Shanda", "RealName": "Chiến Binh Shanda", "FallbackIndex": 27 },
 { "Index": 29, "MinLevel": 525, "MaxLevel": 549, "NPCName": "Mole", "NPCPos": {"X": -4722, "Y": 844, "Z": -1950}, "MonsterLv": 525, "QuestName": "SkyExpQuest", "QuestIndex": 3, "MonsterRawName": "Wysper", "RealName": "Thủ Lĩnh Wysper", "IsBoss": true, "FallbackIndex": 28 },
 { "Index": 30, "MinLevel": 550, "MaxLevel": 574, "NPCName": "Mole", "NPCPos": {"X": -4722, "Y": 844, "Z": -1950}, "MonsterLv": 575, "QuestName": "SkyExpQuest", "QuestIndex": 4, "MonsterRawName": "Thunder God", "RealName": "Chúa Tể Sấm Sét", "IsBoss": true, "FallbackIndex": 29 }
+]
