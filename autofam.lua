@@ -384,7 +384,7 @@ local function tweenTo(targetPos)
     
     if dist > 3 then
         startNoClip()
-        local speed = 520 
+        local speed = 320 
         local tween = TweenService:Create(hrp, TweenInfo.new(dist / speed, Enum.EasingStyle.Linear), {CFrame = CFrame.new(targetPos)})
         tween:Play()
         while tween.PlaybackState == Enum.PlaybackState.Playing do
