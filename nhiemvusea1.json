@@ -30,6 +30,5 @@
 { "Index": 29, "MinLevel": 525, "MaxLevel": 549, "NPCName": "Sky Quest Giver 2", "NPCPos": {"X": -7907, "Y": 5635, "Z": -1412}, "MonsterLv": 525, "QuestName": "SkyExp2Quest", "QuestIndex": 1, "MonsterRawName": "Royal Squad", "RealName": "Đội Quân Hoàng Gia", "FallbackIndex": 28 },
 { "Index": 30, "MinLevel": 550, "MaxLevel": 574, "NPCName": "Sky Quest Giver 2", "NPCPos": {"X": -7907, "Y": 5635, "Z": -1412}, "MonsterLv": 550, "QuestName": "SkyExp2Quest", "QuestIndex": 2, "MonsterRawName": "Royal Soldier", "RealName": "Binh Lính Hoàng Gia", "FallbackIndex": 29 },
   { "Index": 32, "MinLevel": 625, "MaxLevel": 649, "NPCName": "Freezeburg Quest Giver", "MonsterLv": 625, "QuestName": "FountainQuest", "QuestIndex": 1, "MonsterRawName": "Galley Pirate", "RealName": "Hải Tặc Galley", "FallbackIndex": 31 },
-{ "Index": 33, "MinLevel": 650, "MaxLevel": 674, "NPCName": "Freezeburg Quest Giver", "MonsterLv": 650, "QuestName": "FountainQuest", "QuestIndex": 2, "MonsterRawName": "Galley Captain", "RealName": "Đội Trưởng Galley", "FallbackIndex": 32 },
-{ "Index": 34, "MinLevel": 675, "MaxLevel": 699, "NPCName": "Freezeburg Quest Giver", "MonsterLv": 675, "QuestName": "FountainQuest", "QuestIndex": 3, "MonsterRawName": "Cyborg", "RealName": "Cyborg", "IsBoss": true, "FallbackIndex": 33 }
+{ "Index": 33, "MinLevel": 650, "MaxLevel": 674, "NPCName": "Freezeburg Quest Giver", "MonsterLv": 650, "QuestName": "FountainQuest", "QuestIndex": 2, "MonsterRawName": "Galley Captain", "RealName": "Đội Trưởng Galley", "FallbackIndex": 32 }
 ] 
