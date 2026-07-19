@@ -29,4 +29,4 @@
 { "Index": 28, "MinLevel": 475, "MaxLevel": 524, "NPCName": "Mole", "NPCPos": {"X": -7862, "Y": 5546, "Z": -376}, "MonsterLv": 475, "QuestName": "SkyExp1Quest", "QuestIndex": 2, "MonsterRawName": "Shanda", "RealName": "Chiến Binh Shandia", "FallbackIndex": 27 },
 { "Index": 29, "MinLevel": 525, "MaxLevel": 549, "NPCName": "Sky Quest Giver 2", "NPCPos": {"X": -7907, "Y": 5635, "Z": -1412}, "MonsterLv": 525, "QuestName": "SkyExp2Quest", "QuestIndex": 1, "MonsterRawName": "Royal Squad", "RealName": "Đội Quân Hoàng Gia", "FallbackIndex": 28 },
 { "Index": 30, "MinLevel": 550, "MaxLevel": 574, "NPCName": "Sky Quest Giver 2", "NPCPos": {"X": -7907, "Y": 5635, "Z": -1412}, "MonsterLv": 550, "QuestName": "SkyExp2Quest", "QuestIndex": 2, "MonsterRawName": "Royal Soldier", "RealName": "Binh Lính Hoàng Gia", "FallbackIndex": 29 } 
-]
+] 
