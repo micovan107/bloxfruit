@@ -8,5 +8,6 @@
   "Galley Captain": {"X": 5812, "Y": 54, "Z": 4905},
   "Raider": {"X": -742, "Y": 39, "Z": 2388},
   "Mercenary": {"X": -962, "Y": 73, "Z": 1671},
-  "Swan Pirate": {"X": 1025, "Y": 73, "Z": 1247}
+  "Swan Pirate": {"X": 1025, "Y": 73, "Z": 1247},
+  "Factory Staff": {"X": 600, "Y": 73, "Z": -13}
 }
